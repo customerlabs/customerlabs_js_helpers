@@ -1,0 +1,175 @@
+<script>
+  if(!window.jQuery){
+    var jqueryScript = document.createElement('script');
+    jqueryScript.setAttribute('src','https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js'); 
+    document.head.appendChild(jqueryScript); 
+  }
+  
+  var __DL__interval = setInterval(function() {
+    
+    if (window.jQuery && CLabsgbVar) {
+      clearInterval(__DL__interval);
+      if (CLabsgbVar.generalProps && CLabsgbVar.generalProps.uid) {
+        // Helper function
+        function productsConversion(products) {
+          var productsArr = products;
+          var products = []
+          for(let i = 0 ; i < productsArr.length ; i++) {
+            var productsStructure = {}
+            for(key in productsArr[i]) {
+              switch(key) {
+                case "name":
+                case "title":
+                  productsStructure["product_name"] = {"t": "string", "v": productsArr[i][key]}
+                  break;
+                case "id":
+                  productsStructure["product_id"] = {"t": "string", "v": productsArr[i]["id"]}
+                  break;
+                case "price":
+                  productsStructure["product_price"] = {"t": "number", "v": productsArr[i]["price"]}
+                  break;
+                case "category":
+                  productsStructure["product_category"] = {"t": "string", "v": productsArr[i]["category"]}
+                  break;
+                case "brand":
+                  productsStructure["product_brand"] = {"t": "string", "v": productsArr[i]["brand"]}
+                  break;
+                case "variant":
+                  productsStructure["product_variant"] = {"t": "string", "v": productsArr[i]["variant"]}
+                  break;
+                case "coupon":
+                  productsStructure["product_coupon"] = {"t": "string", "v": productsArr[i]["coupon"]}
+                  break;
+                case "quantity":
+                  productsStructure["product_quantity"] = {"t": "string", "v": productsArr[i]["quantity"]}
+                  break;
+                default:
+                  let isnum = /^\d+$/.test(productsArr[i][key]);
+                  var type = ""
+                  if(Array.isArray(productsArr[i][key])) {
+                    continue;
+                  } else if(typeof productsArr[i][key] === 'object' && productsArr[i][key] !== null && !Array.isArray(productsArr[i][key])) {
+                    continue;
+                  } else if(productsArr[i][key] !== null && (Number.isFinite(productsArr[i][key]) || isnum || !isNaN(parseFloat(productsArr[i][key])))) {
+                    type = "number"
+                  }  else {
+                    type = "string"
+                  }
+                  if(key.substring(0, 8) === "product_") {
+                    productsStructure[key] = {"t": type, "v": productsArr[i][key]}
+                  } else {
+                    productsStructure["product_"+key] = {"t": type, "v": productsArr[i][key]}
+                  }
+              }
+            }
+            products.push(productsStructure);
+          }
+          return products
+        }
+        /** 
+        * Checkout & Transaction Data */
+        var __DL__products = [];
+                  
+        {% for line_item in checkout.line_items %}
+                  
+        __DL__products.push({
+          'id'          : {{line_item.product_id | json}},
+          'sku'         : {{line_item.sku | json}},
+          'variantId'   : {{line_item.variant_id | json}},
+          'name'        : {{line_item.title | json}},
+          'productType' : {{line_item.product.type | json}},
+          'price'       : {{line_item.price | money_without_currency | remove: "," | json}},
+          'quantity'    : {{line_item.quantity | json}},
+          'description' : {{line_item.product.description | strip_newlines | strip_html  | json }},
+          'imageURL'    : "https:{{line_item.product.featured_image.src|img_url:'grande'}}", 
+          'productURL'  : '{{shop.secure_url}}{{line_item.product.url}}'
+        });
+                  
+        {% endfor %}
+    
+        var transactionData = {
+          'transaction_id': {
+            't': 'number',
+            'v': {{checkout.order_id | json}}
+          },
+          'transaction_number': {
+            't': 'number',
+            'v': {{checkout.order_number | json}}
+          },
+          'transaction_affiliation': {
+            't': 'string',
+            'v': {{shop.name | json}}
+          },
+          'transaction_total': {
+            't': 'number',
+            'v': {{checkout.total_price | money_without_currency| remove: "," | json}}
+          },
+          'tax': {
+            't': 'number',
+            'v': {{checkout.tax_price | money_without_currency| remove: "," | json}}
+          },
+          'shipping_price': {
+            't': 'number',
+            'v': {{checkout.shipping_price | money_without_currency| remove: "," | json}}
+          },
+          'transactionSubtotal': {
+            't': 'number',
+            'v': {{checkout.subtotal_price | money_without_currency| remove: "," | json}}
+          },
+          {% for discount in checkout.discounts %}
+          'promoCode': {
+            't': 'string',
+            'v': {{discount.code | json}}
+          },
+          'discount': {
+            't': 'number',
+            'v': {{discount.amount | money_without_currency | json}}
+          },
+          {% endfor %}
+        };
+            
+        var productProperties = productsConversion(__DL__products);
+        transactionData["content_type"] = "product_group";
+        transactionData["currency"] = Shopify.currency.active;
+        var propertiesToSend = {
+          'customProperties': transactionData,
+          'productProperties': productProperties
+        };
+    
+        /** DATALAYER: Checkout */
+        if(Shopify.Checkout){
+            
+           if(!document.location.pathname.match(/.*order.*/g) && !document.location.pathname.match(/.*thank_you.*/g)){
+            
+            _cl.trackClick('Checkout made', propertiesToSend);
+            
+          }    
+            
+          if(Shopify.Checkout.step){ 
+            if(Shopify.Checkout.step.length > 0){
+              if (Shopify.Checkout.step === 'contact_information'){
+            
+              }else if (Shopify.Checkout.step === 'shipping_method'){
+          
+              }else if( Shopify.Checkout.step === "payment_method" ){
+              }
+            }
+            
+            if(Shopify.Checkout.page == "thank_you"){
+            
+              setTimeout(function() {
+            
+                _cl.trackClick('Purchased', propertiesToSend);
+            
+            }, 5000);
+            
+            }
+          }
+        }
+      
+      }
+            
+    }
+  
+  }, 2000);
+</script>

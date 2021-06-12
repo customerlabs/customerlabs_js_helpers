@@ -399,6 +399,7 @@
             
         var productProperties = productsConversion(__DL__products);
         transactionData["content_type"] = "product_group";
+        transactionData["currency"] = Shopify.currency.active;
         var propertiesToSend = {
           'customProperties': transactionData,
           'productProperties': productProperties
@@ -407,11 +408,10 @@
         /** DATALAYER: Checkout */
         if(Shopify.Checkout){
             
-          setTimeout(function() {
+          if(!document.location.pathname.match(/.*order.*/g) && !document.location.pathname.match(/.*thank_you.*/g)){
             
             _cl.trackClick('Checkout made', propertiesToSend);
-            
-          }, 5000);
+          }
             
           if(Shopify.Checkout.step){ 
             if(Shopify.Checkout.step.length > 0){
