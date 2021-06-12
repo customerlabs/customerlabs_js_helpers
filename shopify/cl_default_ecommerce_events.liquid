@@ -155,6 +155,7 @@
             var sku = {{product.selected_variant.sku | json}};
 
             var propertiesToSend = {
+              'customProperties': {"content_type": "product_group"},
               'productProperties' : productsConversion(product.products)
             };
       
@@ -397,7 +398,7 @@
         };
             
         var productProperties = productsConversion(__DL__products);
-            
+        transactionData["content_type"] = "product_group";
         var propertiesToSend = {
           'customProperties': transactionData,
           'productProperties': productProperties
@@ -484,6 +485,7 @@
                   if (newCart.length == 1) {
                   
                     var propertiesToSend = {
+                      "customProperties": {"content_type": "product_group"},
                       "productProperties": productsConversion([newCart[0]])
                     };
 
@@ -495,6 +497,7 @@
                     if (oldCart[0].id != newCart[0].id) {
                     
                       var propertiesToSend = {
+                        "customProperties": {"content_type": "product_group"},
                         "productProperties": productsConversion([newCart[0]])
                       };
 
@@ -508,6 +511,7 @@
                       for (var i = 0; i < oldCart.length; i++){
                         if (newCart[i].quantity != oldCart[i].quantity) {
                           var propertiesToSend = {
+                            "customProperties": {"content_type": "product_group"},
                             "productProperties": productsConversion([newCart[i]])
                           };
 
@@ -522,6 +526,7 @@
                       if ( ! isSent ) {
                       
                         var propertiesToSend = {
+                          "customProperties": {"content_type": "product_group"},
                           "productProperties": productsConversion([newCart[newCart.length-1]])
                         };
 
