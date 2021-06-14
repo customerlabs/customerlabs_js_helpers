@@ -303,6 +303,12 @@
                 case "variant":
                   productsStructure["product_variant"] = {"t": "string", "v": productsArr[i]["variant"]}
                   break;
+                case "variantId":
+                  productsStructure["product_variant"] = {"t": "string", "v": productsArr[i]["variantId"]}
+                  break;
+                case "productType":
+                  productsStructure["product_type"] = {"t": "string", "v": productsArr[i]["productType"]}
+                  break;
                 case "coupon":
                   productsStructure["product_coupon"] = {"t": "string", "v": productsArr[i]["coupon"]}
                   break;
@@ -484,9 +490,15 @@
 
                   if (newCart.length == 1) {
                   
+                    var cp = {"content_type": "product_group"};
+                    if(Shopify.currency && Shopify.currency.active){
+                      cp["currency"] = Shopify.currency.active;
+                    }
+                    var clitem = newCart[0];
+                    clitem.price = clitem.price / 100; 
                     var propertiesToSend = {
-                      "customProperties": {"content_type": "product_group"},
-                      "productProperties": productsConversion([newCart[0]])
+                      "customProperties": cp,
+                      "productProperties": productsConversion([clitem])
                     };
 
                     _cl.trackClick("Added to cart", propertiesToSend);
@@ -496,9 +508,15 @@
                   
                     if (oldCart[0].id != newCart[0].id) {
                     
+                      var cp = {"content_type": "product_group"};
+                      if(Shopify.currency && Shopify.currency.active){
+                        cp["currency"] = Shopify.currency.active;
+                      }
+                      var clitem = newCart[0];
+                      clitem.price = clitem.price / 100;
                       var propertiesToSend = {
-                        "customProperties": {"content_type": "product_group"},
-                        "productProperties": productsConversion([newCart[0]])
+                        "customProperties": cp,
+                        "productProperties": productsConversion([clitem])
                       };
 
                       _cl.trackClick("Added to cart", propertiesToSend);
@@ -510,9 +528,15 @@
                       
                       for (var i = 0; i < oldCart.length; i++){
                         if (newCart[i].quantity != oldCart[i].quantity) {
+                          var cp = {"content_type": "product_group"};
+                          if(Shopify.currency && Shopify.currency.active){
+                            cp["currency"] = Shopify.currency.active;
+                          }
+                          var clitem = newCart[i];
+                          clitem.price = clitem.price / 100;
                           var propertiesToSend = {
-                            "customProperties": {"content_type": "product_group"},
-                            "productProperties": productsConversion([newCart[i]])
+                            "customProperties": cp,
+                            "productProperties": productsConversion([clitem])
                           };
 
                           _cl.trackClick("Added to cart", propertiesToSend);
@@ -524,10 +548,16 @@
                       }
                       
                       if ( ! isSent ) {
-                      
+                        var cp = {"content_type": "product_group"};
+                        if(Shopify.currency && Shopify.currency.active){
+                          cp["currency"] = Shopify.currency.active;
+                        }
+                        var clitem = newCart[newCart.length-1];
+                        clitem.price = clitem.price / 100;
+                        
                         var propertiesToSend = {
-                          "customProperties": {"content_type": "product_group"},
-                          "productProperties": productsConversion([newCart[newCart.length-1]])
+                          "customProperties": cp,
+                          "productProperties": productsConversion([clitem])
                         };
 
                         _cl.trackClick("Added to cart", propertiesToSend);
