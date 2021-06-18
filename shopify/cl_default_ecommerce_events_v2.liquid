@@ -226,7 +226,7 @@ __DL__jQueryinterval = setInterval(function(){
             'event'       : 'Collection'
         };
             
-        _cl.pageview("Category viewed", {"customProperties": {"category_name": collection.productList}})
+        _cl.pageview("Category viewed", {"customProperties": {"category_name": collections.productList}})
 
         if(__DL__.debug){
             console.log("Collections"+" :"+JSON.stringify(product, null, " "));
@@ -268,10 +268,15 @@ __DL__jQueryinterval = setInterval(function(){
             };
                 
             function productView(){
-                var sku = {{product.selected_variant.sku | json}};
+                sku = {{product.selected_variant.sku | json}};
+                var ps = productsConversion(product.products)
+                var content_category = ps[0] && ps[0].product_type || "";
                 var propertiesToSend = {
-                    'customProperties': {"content_type": "product_group"},
-                    'productProperties' : productsConversion(product.products)
+                    'customProperties': {
+                        "content_type": "product_group",
+                        "content_category": content_category
+                    },
+                    'productProperties' : ps
                 };
     
                 _cl.pageview("Product viewed", propertiesToSend);
@@ -283,7 +288,7 @@ __DL__jQueryinterval = setInterval(function(){
                     
             $(__DL__.cartTriggers).click(function(){
                 var skumatch = {{product.selected_variant.sku | json}};
-                if(sku != skumatch){
+                if(sku !== skumatch){
                     productView();
                 }
             });
@@ -403,6 +408,7 @@ __DL__jQueryinterval = setInterval(function(){
         
         transactionData["content_type"] = {"t": "string", "v": "product_group"};
         transactionData["currency"] = {"t": "string", "v": Shopify.currency.active};
+        transactionData["value"] = {"t": "number", "v": Number({{checkout.total_price | money_without_currency| remove: "," | json}})};
         
         var propertiesToSend = {
             'customProperties': transactionData,
