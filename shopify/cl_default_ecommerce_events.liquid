@@ -505,6 +505,12 @@ __DL__jQueryinterval = setInterval(function(){
                     console.log("Search"+" :"+JSON.stringify(search, null, " "));
                 }
             }
+            
+            /** Updating cart attribute
+             * 
+             * updating cart attribute with customerlabs user id to identify anonymous users 
+             * on checkout/create or checkout/update event from webhook
+             */
 
             if (template.match(/.*product.*/gi) || template.match(/.*collection.*/gi)) {
                 var img = new Image();
@@ -515,8 +521,8 @@ __DL__jQueryinterval = setInterval(function(){
                     }
                 });
             }
+
             /** Cart */
-            
             // stage cart data
             function mapJSONcartData(){
                 jQuery.getJSON('/cart.js', function (response) {
