@@ -271,11 +271,15 @@ __DL__jQueryinterval = setInterval(function(){
                 sku = {{product.selected_variant.sku | json}};
                 var ps = productsConversion(product.products)
                 var content_category = ps[0] && ps[0].product_type || "";
-                var propertiesToSend = {
-                    'customProperties': {
+                var cust_prop = {
                         "content_type": "product_group",
                         "content_category": content_category
-                    },
+                }
+                if(ps[0].product_price){
+                    cust_prop["value"] = ps[0].product_price;
+                }
+                var propertiesToSend = {
+                    'customProperties': cust_prop,
                     'productProperties' : ps
                 };
     
@@ -677,9 +681,13 @@ __DL__jQueryinterval = setInterval(function(){
                                     if(Shopify.currency && Shopify.currency.active){
                                         cp["currency"] = Shopify.currency.active;
                                     }
+                                    var ps = productsConversion(product.products);
+                                    if(ps[0].product_price){
+                                        cp["value"] = ps[0].product_price;
+                                    }
                                     var propertiesToSend = {
                                         'customProperties': cp,
-                                        'productProperties' : productsConversion(product.products)
+                                        'productProperties': ps
                                     };
                                     _cl.trackClick("Added to cart", propertiesToSend);
                                     if (__DL__.debug) {
@@ -695,9 +703,13 @@ __DL__jQueryinterval = setInterval(function(){
                     if(Shopify.currency && Shopify.currency.active){
                         cp["currency"] = Shopify.currency.active;
                     }
+                    var ps = productsConversion(product.products);
+                    if(ps[0].product_price){
+                        cp["value"] = ps[0].product_price;
+                    }
                     var propertiesToSend = {
                         'customProperties': cp,
-                        'productProperties' : productsConversion(product.products)
+                        'productProperties' : ps
                     };
                     _cl.trackClick("Added to cart", propertiesToSend);
                     
