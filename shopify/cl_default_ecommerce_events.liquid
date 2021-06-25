@@ -412,6 +412,10 @@ __DL__jQueryinterval = setInterval(function(){
         
         transactionData["content_type"] = {"t": "string", "v": "product_group"};
         transactionData["currency"] = {"t": "string", "v": Shopify.currency.active};
+        /*
+        * If you want the purchase value to be without shipping cost,
+        * Just replace `checkout.total_price` with `checkout.subtotal_price` in below line
+        */
         transactionData["value"] = {"t": "number", "v": Number({{checkout.total_price | money_without_currency| remove: "," | json}})};
         
         var propertiesToSend = {
