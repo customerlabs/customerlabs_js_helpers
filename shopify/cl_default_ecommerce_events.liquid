@@ -377,7 +377,8 @@ __DL__jQueryinterval = setInterval(function(){
                 var content_category = ps[0] && ps[0].product_type || "";
                 var cust_prop = {
                         "content_type": "product_group",
-                        "content_category": content_category
+                        "content_category": content_category,
+                        "currency": Shopify.currency.active
                 }
                 if(ps[0].product_price){
                     cust_prop["value"] = ps[0].product_price;
