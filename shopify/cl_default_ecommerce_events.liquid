@@ -110,6 +110,110 @@ __DL__jQueryinterval = setInterval(function(){
         /**********************
         * Begin Clabs Build 
         ***********************/
+        /** 
+        * Log State Cookie */
+
+        {% if customer %}
+        var isLoggedIn = true;
+        {% else %}
+        var isLoggedIn = false;
+        {% endif %}
+        if (!isLoggedIn) {
+            $.cookie('logState', unescape);
+            $.removeCookie('logState', {path: '/'});
+            $.cookie('logState', 'loggedOut', {path: '/'});
+        } else {
+            if ($.cookie('logState') === 'loggedOut' || $.cookie('logState') === undefined) {
+                $.cookie('logState', unescape);
+                $.removeCookie('logState', {path: '/'});
+                $.cookie('logState', 'firstLog', {path: '/'});
+            } else if ($.cookie('logState') === 'firstLog') {
+                $.cookie('logState', unescape);
+                $.removeCookie('logState', {path: '/'});
+                $.cookie('logState', 'refresh', {path: '/'});
+            }
+        }
+
+        if ($.cookie('logState') === 'firstLog') {
+            var firstLog = true;
+        } else {
+            var firstLog = false;
+        }
+
+        /** 
+        * DATALAYER: Log State
+        * 1. Determine if user is logged in or not.
+        * 2. Return User specific data. */
+
+        var logState = {
+            {% if shop.customer_accounts_enabled %}
+            {% if customer %}
+            'userId'        : {{customer.id | json}},
+            'customerEmail' : {{customer.email | json}},
+            'logState'      : "Logged In",
+            'customerInfo'  : {
+                'firstName'   : {{customer_address.first_name | json}},
+                'lastName'    : {{customer_address.last_name | json}},
+                'address1'    : {{customer_address.address1 | json}},
+                'address2'    : {{customer_address.address2 | json}},
+                'street'      : {{customer_address.street | json}},
+                'city'        : {{customer_address.city | json}},
+                'province'    : {{customer_address.province | json}},
+                'zip'         : {{customer_address.zip | json}},
+                'country'     : {{customer_address.country | json}},
+                'phone'       : {{customer_address.phone | json}},
+                'totalOrders' : {{customer.orders_count | json}},
+                'totalSpent'  : {{customer.total_spent | money_without_currency | remove: "," | json}}
+            },
+            {% else %}
+            'logState' : "Logged Out",
+            {% endif %}
+            {% endif %}
+            'firstLog'      : firstLog,
+            'customerEmail' : {{customer.email | json}},
+            'timestamp'     : Date.now(),  
+            {% if customer.orders_count > 2 %}
+            'customerType'       : 'Returning',
+            'customerTypeNumber' : '0',
+            {% else %}
+            'customerType'       : 'New',
+            'customerTypeNumber' :'1', 
+            {% endif %}
+            'shippingInfo' : {
+                'fullName'  : {{checkout.shipping_address.name | json}},
+                'firstName' : {{checkout.shipping_address.first_name | json}},
+                'lastName'  : {{checkout.shipping_address.last_name | json}},
+                'address1'  : {{checkout.shipping_address.address1 | json}},
+                'address2'  : {{checkout.shipping_address.address2 | json}},
+                'street'    : {{checkout.shipping_address.street | json}},
+                'city'      : {{checkout.shipping_address.city | json}},
+                'province'  : {{checkout.shipping_address.province | json}},
+                'zip'       : {{checkout.shipping_address.zip | json}},
+                'country'   : {{checkout.shipping_address.country | json}},
+                'phone'     : {{checkout.shipping_address.phone | json}},
+            },
+            'billingInfo' : {
+                'fullName'  : {{checkout.billing_address.name | json}},
+                'firstName' : {{checkout.billing_address.first_name | json}},
+                'lastName'  : {{checkout.billing_address.last_name | json}},
+                'address1'  : {{checkout.billing_address.address1 | json}},
+                'address2'  : {{checkout.billing_address.address2 | json}},
+                'street'    : {{checkout.billing_address.street | json}},
+                'city'      : {{checkout.billing_address.city | json}},
+                'province'  : {{checkout.billing_address.province | json}},
+                'zip'       : {{checkout.billing_address.zip | json}},
+                'country'   : {{checkout.billing_address.country | json}},
+                'phone'     : {{checkout.billing_address.phone | json}},
+            },
+            'checkoutEmail' : {{checkout.email | json}},
+            'currency'      : {{shop.currency | json}},
+            'pageType'      : 'Log State',
+            'event'         : 'Log State'
+        }
+
+        if(__DL__.debug){
+            console.log("Log State"+" :"+JSON.stringify(logState, null, " "));
+        }
 
         /**
         *   Clabs product helper function
@@ -462,6 +566,42 @@ __DL__jQueryinterval = setInterval(function(){
                 if(__DL__.debug == true){
                     /** Transaction */
                     if(Shopify.Checkout.page == "thank_you"){
+                        var cltraits = {}
+                        if(logState.customerInfo && logState.billingInfo){
+                            cltraits["email"] = logState.customerEmail || logState.checkoutEmail
+                            cltraits["first_name"] = logState.customerInfo.firstName || logState.billingInfo.firstName
+                            cltraits["last_name"] = logState.customerInfo.lastName || logState.billingInfo.lastName
+                            cltraits["city"] = logState.customerInfo.city || logState.billingInfo.city
+                            cltraits["state"] = logState.customerInfo.province || logState.billingInfo.province
+                            cltraits["country"] = logState.customerInfo.country || logState.billingInfo.country
+                        }
+
+                        if(cltraits["email"]){
+                            var user_traits = {}
+                            for(var trait in cltraits){
+                                if(cltraits[trait]){
+                                    user_traits[trait] = {
+                                        "t": "string",
+                                        "v": cltraits[trait]
+                                    }
+                                }
+                            }
+                            var props = {
+                                "customProperties": {
+                                    "user_traits": {
+                                        "t": "Object",
+                                        "v": user_traits
+                                    },
+                                    "identify_by_email": {
+                                        "t":"string",
+                                        "v": cltraits["email"],
+                                        "ib": true
+                                    }
+                                }
+                            }
+
+                            _cl.identify(props)
+                        }
                         setTimeout(function() {    
                             _cl.trackClick('Purchased', propertiesToSend);
                         }, 2000);       
@@ -470,6 +610,42 @@ __DL__jQueryinterval = setInterval(function(){
                 }else{
                     /** Transaction */
                     if(Shopify.Checkout.page == "thank_you"){
+                        var cltraits = {}
+                        if(logState.customerInfo && logState.billingInfo){
+                            cltraits["email"] = logState.customerEmail || logState.checkoutEmail
+                            cltraits["first_name"] = logState.customerInfo.firstName || logState.billingInfo.firstName
+                            cltraits["last_name"] = logState.customerInfo.lastName || logState.billingInfo.lastName
+                            cltraits["city"] = logState.customerInfo.city || logState.billingInfo.city
+                            cltraits["state"] = logState.customerInfo.province || logState.billingInfo.province
+                            cltraits["country"] = logState.customerInfo.country || logState.billingInfo.country
+                        }
+
+                        if(cltraits["email"]){
+                            var user_traits = {}
+                            for(var trait in cltraits){
+                                if(cltraits[trait]){
+                                    user_traits[trait] = {
+                                        "t": "string",
+                                        "v": cltraits[trait]
+                                    }
+                                }
+                            }
+                            var props = {
+                                "customProperties": {
+                                    "user_traits": {
+                                        "t": "Object",
+                                        "v": user_traits
+                                    },
+                                    "identify_by_email": {
+                                        "t":"string",
+                                        "v": cltraits["email"],
+                                        "ib": true
+                                    }
+                                }
+                            }
+
+                            _cl.identify(props)
+                        }
                         setTimeout(function() {    
                             _cl.trackClick('Purchased', propertiesToSend);
                         }, 2000);
