@@ -206,7 +206,7 @@ __DL__jQueryinterval = setInterval(function(){
                 'phone'     : {{checkout.billing_address.phone | json}},
             },
             'checkoutEmail' : {{checkout.email | json}},
-            'currency'      : {{shopify.currency.active | json}},
+            'currency'      : {{checkout.currency | json}},
             'pageType'      : 'Log State',
             'event'         : 'Log State'
         }
@@ -516,7 +516,7 @@ __DL__jQueryinterval = setInterval(function(){
         var productProperties = productsConversion(__DL__products);
         
         transactionData["content_type"] = {"t": "string", "v": "product_group"};
-        transactionData["currency"] = {"t": "string", "v": Shopify.currency.active};
+        transactionData["currency"] = {"t": "string", "v": {{ checkout.currency | json}}};
         /*
         * If you want the purchase value to be without shipping cost,
         * Just replace `checkout.total_price` with `checkout.subtotal_price` in below line
@@ -605,7 +605,7 @@ __DL__jQueryinterval = setInterval(function(){
                         }
                         setTimeout(function() {    
                             _cl.trackClick('Purchased', propertiesToSend);
-                        }, 5000);       
+                        }, 3000);       
                         console.log("Transaction Data"+" :"+JSON.stringify(propertiesToSend, null, " "));  
                     }
                 }else{
