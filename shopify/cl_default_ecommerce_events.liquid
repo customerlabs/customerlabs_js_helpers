@@ -37,7 +37,8 @@ __DL__jQueryinterval = setInterval(function(){
             debug: false, // if true, console messages will be displayed
             cart: null,
             wishlist: null,
-            removeCart: null
+            removeCart: null,
+            fb_skip_contents: false
         };
         
         customBindings = {
@@ -383,6 +384,9 @@ __DL__jQueryinterval = setInterval(function(){
                 if(ps[0].product_price){
                     cust_prop["value"] = ps[0].product_price;
                 }
+                if(__DL__.fb_skip_contents){
+                    cust_prop["skip_contents"] = true;
+                }
                 var propertiesToSend = {
                     'customProperties': cust_prop,
                     'productProperties' : ps
@@ -517,6 +521,9 @@ __DL__jQueryinterval = setInterval(function(){
         
         transactionData["content_type"] = {"t": "string", "v": "product_group"};
         transactionData["currency"] = {"t": "string", "v": {{ checkout.currency | json}}};
+        if(__DL__.fb_skip_contents){
+            transactionData["skip_contents"] = true;
+        }
         /*
         * If you want the purchase value to be without shipping cost,
         * Just replace `checkout.total_price` with `checkout.subtotal_price` in below line
@@ -649,7 +656,7 @@ __DL__jQueryinterval = setInterval(function(){
                         }
                         setTimeout(function() {    
                             _cl.trackClick('Purchased', propertiesToSend);
-                        }, 5000);
+                        }, 3000);
                     }
                 }
             }
@@ -769,8 +776,12 @@ __DL__jQueryinterval = setInterval(function(){
                                             'pageType' : 'Remove from Cart',
                                             'event'    : 'Remove from Cart'         
                                         };
+                                        var cust_prop = {"content_type": "product_group"};
+                                        if(__DL__.fb_skip_contents){
+                                            cust_prop["skip_contents"] = true;
+                                        }
                                         var propertiesToSend = {
-                                            'customProperties': {"content_type": "product_group"},
+                                            'customProperties': cust_prop,
                                             'productProperties' : productsConversion(removeFromCart.products)
                                         };
                                         _cl.trackClick("Removed from cart", propertiesToSend)
@@ -866,6 +877,9 @@ __DL__jQueryinterval = setInterval(function(){
                                     if(ps[0].product_price){
                                         cp["value"] = ps[0].product_price;
                                     }
+                                    if(__DL__.fb_skip_contents){
+                                        cp["skip_contents"] = true;
+                                    }
                                     var propertiesToSend = {
                                         'customProperties': cp,
                                         'productProperties': ps
@@ -887,6 +901,9 @@ __DL__jQueryinterval = setInterval(function(){
                     var ps = productsConversion(product.products);
                     if(ps[0].product_price){
                         cp["value"] = ps[0].product_price;
+                    }
+                    if(__DL__.fb_skip_contents){
+                        cp["skip_contents"] = true;
                     }
                     var propertiesToSend = {
                         'customProperties': cp,
@@ -928,8 +945,12 @@ __DL__jQueryinterval = setInterval(function(){
                                         'pageType' : 'Remove from Cart',
                                         'event'    : 'Remove from Cart'         
                                     };
+                                    var cp  = {"content_type": "product_group"};
+                                    if(__DL__.fb_skip_contents){
+                                        cp["skip_contents"] = true;
+                                    }
                                     var propertiesToSend = {
-                                        'customProperties': {"content_type": "product_group"},
+                                        'customProperties': cp,
                                         'productProperties' : productsConversion(removeFromCart.products)
                                     };
                                     _cl.trackClick("Removed from cart", propertiesToSend)
@@ -955,6 +976,9 @@ __DL__jQueryinterval = setInterval(function(){
                     var cp = {"content_type": "product_group"};
                     if(Shopify.currency && Shopify.currency.active){
                         cp["currency"] = Shopify.currency.active;
+                    }
+                    if(__DL__.fb_skip_contents){
+                        cp["skip_contents"] = true;
                     }
                     var propertiesToSend = {
                         'customProperties': cp,
@@ -993,6 +1017,9 @@ __DL__jQueryinterval = setInterval(function(){
                     if(Shopify.currency && Shopify.currency.active){
                         cp["currency"] = Shopify.currency.active;
                     }
+                    if(__DL__.fb_skip_contents){
+                        cp["skip_contents"] = true;
+                    }
                     var propertiesToSend = {
                         'customProperties': cp,
                         'productProperties' : productsConversion(__DL__prods)
@@ -1023,6 +1050,9 @@ __DL__jQueryinterval = setInterval(function(){
                         var cp = {"content_type": "product_group"};
                         if(Shopify.currency && Shopify.currency.active){
                             cp["currency"] = Shopify.currency.active;
+                        }
+                        if(__DL__.fb_skip_contents){
+                            cp["skip_contents"] = true;
                         }
                         var propertiesToSend = {
                             'customProperties': cp,
