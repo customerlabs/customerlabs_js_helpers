@@ -306,11 +306,11 @@ __DL__jQueryinterval = setInterval(function(){
                     'variantId'       : {{product.selected_variant.id | json}},
                     'productType'     : {{product.type | json}},
                     'name'            : {{product.title | json}},
-                    'price'           : {{product.price | money_without_currency | remove: "," | json}},
+                    'price'           : '{{shop.money_format}}'.includes('with_comma_separator') ? {{product.price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{product.price | money_without_currency | remove: "," | json}},
                     'imageURL'        : "https:{{product.featured_image.src|img_url:'grande'}}", 
                     'productURL'      : '{{shop.secure_url}}{{product.url}}',
                     'brand'           : {{shop.name | json}},
-                    'comparePrice'    : {{product.compare_at_price_max | money_without_currency | remove: "," | json}},
+                    'comparePrice'    : '{{shop.money_format}}'.includes('with_comma_separator') ? {{product.compare_at_price_max | money_without_currency | remove: "." | json}}.replace(',', '.') : {{product.compare_at_price_max | money_without_currency | remove: "," | json}},
                     'categories'      : {{product.collections|map:"title" | json}},
                     'currentCategory' : {{collection.title | json}},
                     'productOptions'  : {
@@ -352,12 +352,12 @@ __DL__jQueryinterval = setInterval(function(){
                     'variantId'       : {{product.selected_variant.id | json}},
                     'productType'     : {{product.type | json}},
                     'name'            : {{product.title | json}},
-                    'price'           : {{product.price | money_without_currency | remove: "," | json}},
+                    'price'           : '{{shop.money_format}}'.includes('with_comma_separator') ? {{product.price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{product.price | money_without_currency | remove: "," | json}},
                     'description'     : {{product.description | strip_newlines | strip_html | json}},
                     'imageURL'        : "https:{{product.featured_image.src|img_url:'grande'}}", 
                     'productURL'      : '{{shop.secure_url}}{{product.url}}',
                     'brand'           : {{shop.name | json}},              
-                    'comparePrice'    : {{product.compare_at_price_max | money_without_currency | remove: "," | json}},
+                    'comparePrice'    : '{{shop.money_format}}'.includes('with_comma_separator') ? {{product.compare_at_price_max | money_without_currency | remove: "." | json}}.replace(',', '.') : {{product.compare_at_price_max | money_without_currency | remove: "," | json}},
                     'categories'      : {{product.collections | map:"title" | json}},
                     'currentCategory' : {{collection.title | json}},
                     'productOptions'  : {
@@ -417,7 +417,7 @@ __DL__jQueryinterval = setInterval(function(){
                 'sku'      : {{line_item.sku | json}},
                 'variant'  : {{line_item.variant_id | json}},
                 'name'     : {{line_item.title | json}},
-                'price'    : {{line_item.price | money_without_currency | remove: "," | json}},
+                'price'    : '{{shop.money_format}}'.includes('with_comma_separator') ? {{line_item.price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{line_item.price | money_without_currency | remove: "," | json}},
                 'quantity' : {{line_item.quantity | json}}
             },{% endfor %}],
             'pageType' : 'Cart',
@@ -494,7 +494,7 @@ __DL__jQueryinterval = setInterval(function(){
                 'variantId'   : {{line_item.variant_id | json}},
                 'name'        : {{line_item.title | json}},
                 'productType' : {{line_item.product.type | json}},
-                'price'       : {{line_item.price | money_without_currency | remove: "," | json}},
+                'price'       : '{{shop.money_format}}'.includes('with_comma_separator') ? {{line_item.price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{line_item.price | money_without_currency | remove: "," | json}},
                 'quantity'    : {{line_item.quantity | json}},
                 'description' : {{line_item.product.description | strip_newlines | strip_html  | json }},
                 'imageURL'    : "https:{{line_item.product.featured_image.src|img_url:'grande'}}", 
@@ -506,10 +506,10 @@ __DL__jQueryinterval = setInterval(function(){
             'transaction_number'      : {'t': 'string', 'v': {{checkout.order_id | json}} },
             'transaction_id'          : {'t': 'string', 'v': {{checkout.order_number | json}} },
             'transaction_affiliation' : {'t': 'string', 'v': {{shop.name | json}} },
-            'transaction_total'       : {'t': 'number', 'v':  {{checkout.total_price | money_without_currency| remove: "," | json}} },
-            'tax'         : {'t': 'number', 'v': {{checkout.tax_price | money_without_currency| remove: "," | json}} },
-            'shipping'    : {'t': 'number', 'v': {{checkout.shipping_price | money_without_currency| remove: "," | json}} },
-            'subtotal'    : {'t': 'number', 'v': {{checkout.subtotal_price | money_without_currency| remove: "," | json}} },
+            'transaction_total'       : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.total_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.total_price | money_without_currency | remove: "," | json}} },
+            'tax'         : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.tax_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.tax_price | money_without_currency | remove: "," | json}} },
+            'shipping'    : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.shipping_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.shipping_price | money_without_currency | remove: "," | json}} },
+            'subtotal'    : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.subtotal_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.subtotal_price | money_without_currency | remove: "," | json}} },
             {% for discount in checkout.discounts %}
             'promo_code' : {'t': 'string', 'v': {{discount.code | json}} },
             'discount'  : {'t': 'number', 'v': {{discount.amount | money_without_currency | json}} },
@@ -528,7 +528,7 @@ __DL__jQueryinterval = setInterval(function(){
         * If you want the purchase value to be without shipping cost,
         * Just replace `checkout.total_price` with `checkout.subtotal_price` in below line
         */
-        transactionData["value"] = {"t": "number", "v": Number({{checkout.total_price | money_without_currency| remove: "," | json}})};
+        transactionData["value"] = {"t": "number", "v": Number('{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.total_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.total_price | money_without_currency | remove: "," | json}})};
         
         var propertiesToSend = {
             'customProperties': transactionData,
