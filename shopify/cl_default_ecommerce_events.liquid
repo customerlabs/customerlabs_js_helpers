@@ -630,7 +630,7 @@ window.clShopifyTrack = function() {
                 /** Transaction */
                 if(Shopify.Checkout.page == "thank_you"){
                     var cltraits = {}
-                    if(logState.customerInfo && logState.billingInfo){
+                    if(logState.customerInfo || logState.billingInfo){
                         cltraits["email"] = logState.customerEmail || logState.checkoutEmail
                         cltraits["first_name"] = logState.customerInfo.firstName || logState.billingInfo.firstName
                         cltraits["last_name"] = logState.customerInfo.lastName || logState.billingInfo.lastName
