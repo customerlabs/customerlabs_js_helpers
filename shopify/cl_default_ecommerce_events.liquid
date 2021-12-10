@@ -578,11 +578,11 @@ window.clShopifyTrack = function() {
                     var cltraits = {}
                     if(logState.customerInfo || logState.billingInfo){
                         cltraits["email"] = logState.customerEmail || logState.checkoutEmail
-                        cltraits["first_name"] = logState.customerInfo.firstName || logState.billingInfo.firstName
-                        cltraits["last_name"] = logState.customerInfo.lastName || logState.billingInfo.lastName
-                        cltraits["city"] = logState.customerInfo.city || logState.billingInfo.city
-                        cltraits["state"] = logState.customerInfo.province || logState.billingInfo.province
-                        cltraits["country"] = logState.customerInfo.country || logState.billingInfo.country
+                        cltraits["first_name"] = (logState.customerInfo && logState.customerInfo.firstName) || (logState.billingInfo && logState.billingInfo.firstName)
+                        cltraits["last_name"] = (logState.customerInfo && logState.customerInfo.lastName) || (logState.billingInfo && logState.billingInfo.lastName)
+                        cltraits["city"] = (logState.customerInfo && logState.customerInfo.city) || (logState.billingInfo && logState.billingInfo.city)
+                        cltraits["state"] = (logState.customerInfo && logState.customerInfo.province) || (logState.billingInfo && logState.billingInfo.province)
+                        cltraits["country"] = (logState.customerInfo && logState.customerInfo.country) || (logState.billingInfo && logState.billingInfo.country)
                     }
 
                     if(cltraits["email"]){
@@ -632,11 +632,11 @@ window.clShopifyTrack = function() {
                     var cltraits = {}
                     if(logState.customerInfo || logState.billingInfo){
                         cltraits["email"] = logState.customerEmail || logState.checkoutEmail
-                        cltraits["first_name"] = logState.customerInfo.firstName || logState.billingInfo.firstName
-                        cltraits["last_name"] = logState.customerInfo.lastName || logState.billingInfo.lastName
-                        cltraits["city"] = logState.customerInfo.city || logState.billingInfo.city
-                        cltraits["state"] = logState.customerInfo.province || logState.billingInfo.province
-                        cltraits["country"] = logState.customerInfo.country || logState.billingInfo.country
+                        cltraits["first_name"] = (logState.customerInfo && logState.customerInfo.firstName) || (logState.billingInfo && logState.billingInfo.firstName)
+                        cltraits["last_name"] = (logState.customerInfo && logState.customerInfo.lastName) || (logState.billingInfo && logState.billingInfo.lastName)
+                        cltraits["city"] = (logState.customerInfo && logState.customerInfo.city) || (logState.billingInfo && logState.billingInfo.city)
+                        cltraits["state"] = (logState.customerInfo && logState.customerInfo.province) || (logState.billingInfo && logState.billingInfo.province)
+                        cltraits["country"] = (logState.customerInfo && logState.customerInfo.country) || (logState.billingInfo && logState.billingInfo.country)
                     }
 
                     if(cltraits["email"]){
