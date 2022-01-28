@@ -1,0 +1,66 @@
+<script id="cl_addition_scrip" type="text/javascript">
+    window.clShopifyTrack = function(){
+        console.log(window.Shopify.order);
+        console.log(window.Shopify.checkout);
+        {% unless post_purchase_page_accessed %}
+            
+            var products = []
+            {% for line_item in checkout.line_items %}
+                
+                products.push({
+                    'product_id': {"t": "string", "v": {{line_item.product_id | json}}},
+                    'product_sku': {"t": "string", "v": {{line_item.sku | json}}},
+                    'product_variant': {"t": "string", "v": {{line_item.variant_id | json}}},
+                    'product_name': {"t": "string", "v": {{line_item.title | json}}},
+                    'product_type': {"t": "string", "v": {{line_item.product.type | json}}},
+                    'product_price': {"t": "string", 
+                        "v": '{{shop.money_format}}'.includes('with_comma_separator') ? {{line_item.price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{line_item.price | money_without_currency | remove: "," | json}}
+                    },
+                    'product_quantity':{"t": "string", "v": {{line_item.quantity | json}}}
+                });
+                    
+            {% endfor %}
+            var transactionData = {
+                'transaction_number'      : {'t': 'string', 'v': {{checkout.order_id | json}} },
+                'transaction_id'          : {'t': 'string', 'v': {{checkout.order_number | json}} },
+                'transaction_affiliation' : {'t': 'string', 'v': {{shop.name | json}} },
+                'transaction_total'       : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.total_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.total_price | money_without_currency | remove: "," | json}} },
+                'tax'         : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.tax_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.tax_price | money_without_currency | remove: "," | json}} },
+                'shipping'    : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.shipping_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.shipping_price | money_without_currency | remove: "," | json}} },
+                'subtotal'    : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.subtotal_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.subtotal_price | money_without_currency | remove: "," | json}} },
+                {% for discount in checkout.discounts %}
+                'promo_code' : {'t': 'string', 'v': {{discount.code | json}} },
+                'discount'  : {'t': 'number', 'v': {{discount.amount | money_without_currency | json}} },
+                {% endfor %}
+            };
+                        
+            transactionData["content_type"] = {"t": "string", "v": "product_group"};
+            transactionData["currency"] = {"t": "string", "v": {{ checkout.currency | json}}};
+            
+            /*
+            * If you want the purchase value to be without shipping cost,
+            * Just replace `checkout.total_price` with `checkout.subtotal_price` in below line
+            */
+            transactionData["value"] = {"t": "number", "v": Number('{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.total_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.total_price | money_without_currency | remove: "," | json}})};
+            
+            var propertiesToSend = {
+                'customProperties': transactionData,
+                'productProperties': products
+            };
+
+            if(transactionData.transaction_id && transactionData.transaction_id.v && window.localStorage){
+                var purchases_str = localStorage.getItem('cl_past_purchases') || "{}";
+                var purchases = JSON.parse(purchases_str);
+                if(!purchases[transactionData.transaction_id.v]){
+                    _cl.trackClick('Purchased', propertiesToSend);
+                    purchases[transactionData.transaction_id.v] = "true";
+                    window.localStorage.setItem("cl_past_purchases", JSON.stringify(purchases));
+                }
+            }else{
+                _cl.trackClick('Purchased', propertiesToSend);
+            }
+
+        {% endunless %}
+            
+    }
+</script>
