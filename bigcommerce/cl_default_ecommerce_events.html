@@ -48,7 +48,7 @@
     
         __BC__ = {
             pageType: '{{page_type}}',
-            categoryName: '{{category.name}}',
+            categoryName: encodeURI('{{category.name}}'),
             currency: '{{currency_selector.active_currency_code}}',
             analyticsData: window.analyticsData || {},
             cartItems: htmlDecode("{{json cart.items}}"),
@@ -137,7 +137,7 @@
                             "product_name": '{{product.title}}', // Name or ID is required.
                             "product_id": '{{product.id}}',
                             "product_price": '{{product.price.without_tax.value}}',
-                            "product_category": '{{product.category}}',
+                            "product_category": encodeURI('{{product.category}}'),
                             "product_variant": '{{product.sku}}',
                             "product_sku": '{{product.sku}}'
                         });
@@ -195,14 +195,14 @@
             _cl.pageview("Product viewed", {
                 "customProperties": {
                     "content_type": "product_group",
-                    "content_category": "{{product.category}}",
+                    "content_category": encodeURI("{{product.category}}"),
                     "currency": __BC__.currency
                 },
                 "productProperties": [{
                     "product_name": '{{product.title}}', // Name or ID is required.
                     "product_id": '{{product.id}}',
                     "product_price": '{{product.price.without_tax.value}}',
-                    "product_category": '{{product.category}}',
+                    "product_category": encodeURI('{{product.category}}'),
                     "product_variant": '{{product.sku}}',
                     "product_sku": '{{product.sku}}'
                 }]
@@ -225,7 +225,7 @@
                         "product_id": product.product_id,
                         "product_quantity": product.quantity,
                         "product_price": product.price.value,
-                        "product_category": product.category || "",
+                        "product_category": encodeURI(product.category || ""),
                         "product_variant": product.sku,
                         "product_sku": product.sku
                     }
@@ -484,7 +484,7 @@
                                 "product_id": product.productId,
                                 "product_quantity": product.quantity,
                                 "product_price": product.salePrice,
-                                "product_category": product.category | "",
+                                "product_category": encodeURI(product.category || ""),
                                 "product_sku": product.sku
                             });
                             delete_cookie("cl_bc_ajax_atc_" + product.productId);
