@@ -555,149 +555,25 @@ window.clShopifyTrack = function() {
         if(Shopify.Checkout.step){ 
             if(Shopify.Checkout.step.length > 0){
                 if (Shopify.Checkout.step === 'contact_information'){
-                        _cl.trackClick("AddContact", {'customProperties': transactionData})
-                        if(__DL__.debug == true){
-                            console.log("Customer Information - Transaction Data"+" :"+JSON.stringify(transactionData, null, " "));
-                        }
-                    }else if (Shopify.Checkout.step === 'shipping_method'){
-                        _cl.trackClick("AddShippingInfo", {'customProperties': transactionData})
-                        if(__DL__.debug == true){
-                            console.log("Shipping - Transaction Data"+" :"+JSON.stringify(transactionData, null, " "));
-                        }
-                    }else if( Shopify.Checkout.step === "payment_method" ){
-                        _cl.trackClick("AddPaymentInfo", {'customProperties': transactionData})
-                        if(__DL__.debug == true){
-                            console.log("Payment - Transaction Data"+" :"+JSON.stringify(transactionData, null, " "));
-                        }
+                    _cl.trackClick("AddContact", {'customProperties': transactionData})
+                    if(__DL__.debug == true){
+                        console.log("Customer Information - Transaction Data"+" :"+JSON.stringify(transactionData, null, " "));
                     }
-            }
-                        
-            if(__DL__.debug == true){
-                /** Transaction */
-                if(Shopify.Checkout.page == "thank_you"){
-                    var cltraits = {};
-                    if(logState.customerInfo){
-                        cltraits = composeTraits(logState, logState.customerInfo)
+                }else if (Shopify.Checkout.step === 'shipping_method'){
+                    _cl.trackClick("AddShippingInfo", {'customProperties': transactionData})
+                    if(__DL__.debug == true){
+                        console.log("Shipping - Transaction Data"+" :"+JSON.stringify(transactionData, null, " "));
                     }
-                    if(logState.billingInfo){
-                        cltraits = composeTraits(logState, logState.billingInfo)
+                }else if( Shopify.Checkout.step === "payment_method" ){
+                    _cl.trackClick("AddPaymentInfo", {'customProperties': transactionData})
+                    if(__DL__.debug == true){
+                        console.log("Payment - Transaction Data"+" :"+JSON.stringify(transactionData, null, " "));
                     }
-
-                    if(cltraits["email"]){
-                        var user_traits = {}
-                        for(var trait in cltraits){
-                            if(cltraits[trait]){
-                                user_traits[trait] = {
-                                    "t": "string",
-                                    "v": cltraits[trait]
-                                }
-                            }
-                        }
-                        var props = {
-                            "customProperties": {
-                                "user_traits": {
-                                    "t": "Object",
-                                    "v": user_traits
-                                },
-                                "identify_by_email": {
-                                    "t":"string",
-                                    "v": cltraits["email"],
-                                    "ib": true
-                                }
-                            }
-                        }
-
-                        _cl.identify(props)
-                    }
-
-                    if(transactionData.transaction_id && transactionData.transaction_id.v && window.localStorage){
-                        var purchases_str = localStorage.getItem('cl_past_purchases') || "{}";
-                        var purchases = JSON.parse(purchases_str);
-                        if(!purchases[transactionData.transaction_id.v]){
-                            _cl.trackClick('Purchased', propertiesToSend);
-                            purchases[transactionData.transaction_id.v] = "true";
-                            window.localStorage.setItem("cl_past_purchases", JSON.stringify(purchases));
-                        }
-                    }else{
-                        _cl.trackClick('Purchased', propertiesToSend);
-                    }
-
-                    console.log("Transaction Data"+" :"+JSON.stringify(propertiesToSend, null, " "));  
-                }
-            }else{
-                /** Transaction */
-                if(Shopify.Checkout.page == "thank_you"){
-                    var cltraits = {};
-                    if(logState.customerInfo){
-                        cltraits = composeTraits(logState, logState.customerInfo)
-                    }
-                    if(logState.billingInfo){
-                        cltraits = composeTraits(logState, logState.billingInfo)
-                    }
-                    if(cltraits["email"]){
-                        var user_traits = {}
-                        for(var trait in cltraits){
-                            if(cltraits[trait]){
-                                user_traits[trait] = {
-                                    "t": "string",
-                                    "v": cltraits[trait]
-                                }
-                            }
-                        }
-                        var props = {
-                            "customProperties": {
-                                "user_traits": {
-                                    "t": "Object",
-                                    "v": user_traits
-                                },
-                                "identify_by_email": {
-                                    "t":"string",
-                                    "v": cltraits["email"],
-                                    "ib": true
-                                }
-                            }
-                        }
-
-                        _cl.identify(props)
-                    }
-
-                    if(transactionData.transaction_id && transactionData.transaction_id.v && window.localStorage){
-                        var purchases_str = localStorage.getItem('cl_past_purchases') || "{}";
-                        var purchases = JSON.parse(purchases_str);
-                        if(!purchases[transactionData.transaction_id.v]){
-                            _cl.trackClick('Purchased', propertiesToSend);
-                            purchases[transactionData.transaction_id.v] = "true";
-                            window.localStorage.setItem("cl_past_purchases", JSON.stringify(purchases));
-                        }
-                    }else{
-                        _cl.trackClick('Purchased', propertiesToSend);
-                    }
-
                 }
             }
         }
     }
-                    
-    function composeTraits(logState, traits){
-        var cltraits = {};
-        cltraits["email"] = logState.customerEmail || logState.checkoutEmail
-        cltraits["first_name"] = traits.firstName;
-        cltraits["last_name"] = traits.lastName;
-        cltraits["city"] = traits.city;
-        cltraits["state"] = traits.province;
-        cltraits["country"] = traits.country;
-        cltraits["postal_code"] = traits.zip;
-        if(traits.phone){
-            cltraits["phone"] = traits.phone
-        }
-        if(traits.totalOrders){
-            cltraits["total_orders"] = traits.totalOrders;
-        }
-        if(traits.totalSpent){
-            cltraits["total_spent"] = traits.totalSpent;
-        }
-        return cltraits;
-    }
+
                     
     /**********************
     * Customerlabs EVENT BINDINGS
@@ -849,7 +725,8 @@ window.clShopifyTrack = function() {
             }
         });
     }
-    
+    var collection_cartIDs = [];
+    var collection_matchIDs = [];
     // add to cart
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
@@ -868,9 +745,6 @@ window.clShopifyTrack = function() {
                 })
             }
             __DL__.cart = cart;
-            collection_cartIDs = [];
-            collection_matchIDs = [];
-            collection_addtocart = [];
             for (var i = __DL__.cart.products.length - 1; i >= 0; i--) {
                 var x = parseFloat(__DL__.cart.products[i].variant);
                 collection_cartIDs.push(x);
@@ -883,7 +757,7 @@ window.clShopifyTrack = function() {
     
     function __DL__addtocart(){
 
-        {% if template contains 'collection' %}         
+        {% if template contains 'collection' or template contains 'index' %}         
         
             setTimeout(function(){
                 var xhttp = new XMLHttpRequest();

@@ -1,7 +1,5 @@
 <script id="cl_addition_scrip" type="text/javascript">
     window.clShopifyTrack = function(){
-        console.log(window.Shopify.order);
-        console.log(window.Shopify.checkout);
         {% unless post_purchase_page_accessed %}
             
             var products = []
@@ -58,6 +56,47 @@
                 }
             }else{
                 _cl.trackClick('Purchased', propertiesToSend);
+            }
+
+            var cltraits = {
+                'email'     : {{checkout.email | json}},
+                'fullName'  : {{checkout.billing_address.name | json}},
+                'firstName' : {{checkout.billing_address.first_name | json}},
+                'lastName'  : {{checkout.billing_address.last_name | json}},
+                'address1'  : {{checkout.billing_address.address1 | json}},
+                'address2'  : {{checkout.billing_address.address2 | json}},
+                'street'    : {{checkout.billing_address.street | json}},
+                'city'      : {{checkout.billing_address.city | json}},
+                'province'  : {{checkout.billing_address.province | json}},
+                'zip'       : {{checkout.billing_address.zip | json}},
+                'country'   : {{checkout.billing_address.country | json}},
+                'phone'     : {{checkout.billing_address.phone | json}},
+            }
+
+            if(cltraits["email"]){
+                var user_traits = {}
+                for(var trait in cltraits){
+                    if(cltraits[trait]){
+                        user_traits[trait] = {
+                            "t": "string",
+                            "v": cltraits[trait]
+                        }
+                    }
+                }
+                var props = {
+                    "customProperties": {
+                        "user_traits": {
+                            "t": "Object",
+                            "v": user_traits
+                        },
+                        "identify_by_email": {
+                            "t":"string",
+                            "v": cltraits["email"],
+                            "ib": true
+                        }
+                    }
+                }
+                _cl.identify(props)
             }
 
         {% endunless %}
