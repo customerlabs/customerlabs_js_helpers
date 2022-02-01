@@ -11,6 +11,10 @@
             var doc = new DOMParser().parseFromString(parsedInput, 'text/html');
             return JSON.parse(doc.documentElement.textContent);
         }
+
+        function escapeHtml(str) {
+            return str.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, "\"").replace(/&#039;/g, "\'");
+        }
     
         function getURLParams(name, url){
             if (!url) url = window.location.href;
@@ -48,13 +52,14 @@
     
         __BC__ = {
             pageType: '{{page_type}}',
-            categoryName: encodeURI('{{category.name}}'),
+            categoryName: escapeHtml('{{category.name}}'),
             currency: '{{currency_selector.active_currency_code}}',
             analyticsData: window.analyticsData || {},
             cartItems: htmlDecode("{{json cart.items}}"),
             checkoutId: '{{checkout.id}}' || 0,
             orderId: '{{checkout.order.id}}' || 0,
             mainPageAjaxAddButton: false, // set true if the products list has ajax "add to cart" button
+            fb_skip_contents: false,
         }
     
         /**
@@ -137,7 +142,7 @@
                             "product_name": '{{product.title}}', // Name or ID is required.
                             "product_id": '{{product.id}}',
                             "product_price": '{{product.price.without_tax.value}}',
-                            "product_category": encodeURI('{{product.category}}'),
+                            "product_category": escapeHtml('{{product.category}}'),
                             "product_variant": '{{product.sku}}',
                             "product_sku": '{{product.sku}}'
                         });
@@ -192,17 +197,21 @@
          * Tracks Product views
          */
         function onProductDetailsView() {
+            var cust_prop = {
+                "content_type": "product_group",
+                "content_category": escapeHtml("{{product.category}}"),
+                "currency": __BC__.currency
+            }
+            if(__BC__.fb_skip_contents){
+                cust_prop["skip_contents"] = true;
+            }
             _cl.pageview("Product viewed", {
-                "customProperties": {
-                    "content_type": "product_group",
-                    "content_category": encodeURI("{{product.category}}"),
-                    "currency": __BC__.currency
-                },
+                "customProperties": cust_prop,
                 "productProperties": [{
                     "product_name": '{{product.title}}', // Name or ID is required.
                     "product_id": '{{product.id}}',
                     "product_price": '{{product.price.without_tax.value}}',
-                    "product_category": encodeURI('{{product.category}}'),
+                    "product_category": escapeHtml('{{product.category}}'),
                     "product_variant": '{{product.sku}}',
                     "product_sku": '{{product.sku}}'
                 }]
@@ -214,18 +223,22 @@
          */
         function onViewCart() {
             var products = __BC__.analyticsData.products || __BC__.cartItems || []
+            var cust_prop = {
+                "product_category": "product_group",
+                "currency": __BC__.currency
+            }
+            if(__BC__.fb_skip_contents){
+                cust_prop["skip_contents"] = true;
+            }
             var propertiesToSend = {
-                'customProperties': {
-                    "product_category": "product_group",
-                    "currency": __BC__.currency
-                },
+                'customProperties': cust_prop,
                 'productProperties': products.map(function (product) {
                     return {
                         "product_name": product.name, // Name or ID is required.
                         "product_id": product.product_id,
                         "product_quantity": product.quantity,
                         "product_price": product.price.value,
-                        "product_category": encodeURI(product.category || ""),
+                        "product_category": escapeHtml(product.category || ""),
                         "product_variant": product.sku,
                         "product_sku": product.sku
                     }
@@ -247,11 +260,15 @@
          */
         function onAddToCart(productId, product) {
             if(product){
+                var cust_prop = {
+                    "product_category": "product_group",
+                    "currency": __BC__.currency
+                }
+                if(__BC__.fb_skip_contents){
+                    cust_prop["skip_contents"] = true;
+                }
                 propertiesToSend = {
-                    'customProperties': {
-                        "product_category": "product_group",
-                        "currency": __BC__.currency
-                    },
+                    'customProperties': cust_prop,
                     'productProperties': [product]
                 };
                 _cl.trackClick("Added to cart", propertiesToSend)
@@ -272,11 +289,15 @@
             for(var id in products){
                 var product = products[id];
                 if(product.id == cartItemId){
+                    var cust_prop = {
+                        "product_category": "product_group",
+                        "currency": __BC__.currency
+                    }
+                    if(__BC__.fb_skip_contents){
+                        cust_prop["skip_contents"] = true;
+                    }
                     var propertiesToSend = {
-                        'customProperties': {
-                            "product_category": "product_group",
-                            "currency": __BC__.currency
-                        },
+                        'customProperties': cust_prop,
                         'productProperties' : [{
                             "product_id": product.product_id,
                             "product_name": product.name,
@@ -301,6 +322,9 @@
                     props[k] = analyticsData[k];
                 }   
             }
+            if(__BC__.fb_skip_contents){
+                props["skip_contents"] = true;
+            }
             var propertiesToSend = {
                 "customProperties": props,
                 "productProperties": analyticsData.products
@@ -319,7 +343,9 @@
                     customProps[k] = analyticsData[k];
                 }   
             }
-            
+            if(__BC__.fb_skip_contents){
+                customProps["skip_contents"] = true;
+            }
             var propertiesToSend = {
                 "customProperties": customProps,
                 "productProperties": analyticsData.products
@@ -484,7 +510,7 @@
                                 "product_id": product.productId,
                                 "product_quantity": product.quantity,
                                 "product_price": product.salePrice,
-                                "product_category": encodeURI(product.category || ""),
+                                "product_category": escapeHtml(product.category || ""),
                                 "product_sku": product.sku
                             });
                             delete_cookie("cl_bc_ajax_atc_" + product.productId);
