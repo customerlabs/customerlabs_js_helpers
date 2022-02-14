@@ -1,104 +1,104 @@
 <script id="cl_addition_scrip" type="text/javascript">
     window.clShopifyTrack = function(){
         {% unless post_purchase_page_accessed %}
-            
-            var products = []
-            {% for line_item in checkout.line_items %}
-                
-                products.push({
-                    'product_id': {"t": "string", "v": {{line_item.product_id | json}}},
-                    'product_sku': {"t": "string", "v": {{line_item.sku | json}}},
-                    'product_variant': {"t": "string", "v": {{line_item.variant_id | json}}},
-                    'product_name': {"t": "string", "v": {{line_item.title | json}}},
-                    'product_type': {"t": "string", "v": {{line_item.product.type | json}}},
-                    'product_price': {"t": "string", 
-                        "v": '{{shop.money_format}}'.includes('with_comma_separator') ? {{line_item.price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{line_item.price | money_without_currency | remove: "," | json}}
-                    },
-                    'product_quantity':{"t": "string", "v": {{line_item.quantity | json}}}
-                });
+            {% if first_time_accessed %}
+                var products = []
+                {% for line_item in checkout.line_items %}
                     
-            {% endfor %}
-            var transactionData = {
-                'transaction_number'      : {'t': 'string', 'v': {{checkout.order_id | json}} },
-                'transaction_id'          : {'t': 'string', 'v': {{checkout.order_number | json}} },
-                'transaction_affiliation' : {'t': 'string', 'v': {{shop.name | json}} },
-                'transaction_total'       : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.total_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.total_price | money_without_currency | remove: "," | json}} },
-                'tax'         : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.tax_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.tax_price | money_without_currency | remove: "," | json}} },
-                'shipping'    : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.shipping_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.shipping_price | money_without_currency | remove: "," | json}} },
-                'subtotal'    : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.subtotal_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.subtotal_price | money_without_currency | remove: "," | json}} },
-                {% for discount in checkout.discounts %}
-                'promo_code' : {'t': 'string', 'v': {{discount.code | json}} },
-                'discount'  : {'t': 'number', 'v': {{discount.amount | money_without_currency | json}} },
-                {% endfor %}
-            };
-                        
-            transactionData["content_type"] = {"t": "string", "v": "product_group"};
-            transactionData["currency"] = {"t": "string", "v": {{ checkout.currency | json}}};
-            
-            /*
-            * If you want the purchase value to be without shipping cost,
-            * Just replace `checkout.total_price` with `checkout.subtotal_price` in below line
-            */
-            transactionData["value"] = {"t": "number", "v": Number('{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.total_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.total_price | money_without_currency | remove: "," | json}})};
-            
-            var propertiesToSend = {
-                'customProperties': transactionData,
-                'productProperties': products
-            };
-
-            if(transactionData.transaction_id && transactionData.transaction_id.v && window.localStorage){
-                var purchases_str = localStorage.getItem('cl_past_purchases') || "{}";
-                var purchases = JSON.parse(purchases_str);
-                if(!purchases[transactionData.transaction_id.v]){
-                    _cl.trackClick('Purchased', propertiesToSend);
-                    purchases[transactionData.transaction_id.v] = "true";
-                    window.localStorage.setItem("cl_past_purchases", JSON.stringify(purchases));
-                }
-            }else{
-                _cl.trackClick('Purchased', propertiesToSend);
-            }
-
-            var cltraits = {
-                'email'     : {{checkout.email | json}},
-                'fullName'  : {{checkout.billing_address.name | json}},
-                'firstName' : {{checkout.billing_address.first_name | json}},
-                'lastName'  : {{checkout.billing_address.last_name | json}},
-                'address1'  : {{checkout.billing_address.address1 | json}},
-                'address2'  : {{checkout.billing_address.address2 | json}},
-                'street'    : {{checkout.billing_address.street | json}},
-                'city'      : {{checkout.billing_address.city | json}},
-                'province'  : {{checkout.billing_address.province | json}},
-                'zip'       : {{checkout.billing_address.zip | json}},
-                'country'   : {{checkout.billing_address.country | json}},
-                'phone'     : {{checkout.billing_address.phone | json}},
-            }
-
-            if(cltraits["email"]){
-                var user_traits = {}
-                for(var trait in cltraits){
-                    if(cltraits[trait]){
-                        user_traits[trait] = {
-                            "t": "string",
-                            "v": cltraits[trait]
-                        }
-                    }
-                }
-                var props = {
-                    "customProperties": {
-                        "user_traits": {
-                            "t": "Object",
-                            "v": user_traits
+                    products.push({
+                        'product_id': {"t": "string", "v": {{line_item.product_id | json}}},
+                        'product_sku': {"t": "string", "v": {{line_item.sku | json}}},
+                        'product_variant': {"t": "string", "v": {{line_item.variant_id | json}}},
+                        'product_name': {"t": "string", "v": {{line_item.title | json}}},
+                        'product_type': {"t": "string", "v": {{line_item.product.type | json}}},
+                        'product_price': {"t": "string", 
+                            "v": '{{shop.money_format}}'.includes('with_comma_separator') ? {{line_item.price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{line_item.price | money_without_currency | remove: "," | json}}
                         },
-                        "identify_by_email": {
-                            "t":"string",
-                            "v": cltraits["email"],
-                            "ib": true
+                        'product_quantity':{"t": "string", "v": {{line_item.quantity | json}}}
+                    });
+                        
+                {% endfor %}
+                var transactionData = {
+                    'transaction_number'      : {'t': 'string', 'v': {{checkout.order_id | json}} },
+                    'transaction_id'          : {'t': 'string', 'v': {{checkout.order_number | json}} },
+                    'transaction_affiliation' : {'t': 'string', 'v': {{shop.name | json}} },
+                    'transaction_total'       : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.total_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.total_price | money_without_currency | remove: "," | json}} },
+                    'tax'         : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.tax_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.tax_price | money_without_currency | remove: "," | json}} },
+                    'shipping'    : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.shipping_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.shipping_price | money_without_currency | remove: "," | json}} },
+                    'subtotal'    : {'t': 'number', 'v': '{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.subtotal_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.subtotal_price | money_without_currency | remove: "," | json}} },
+                    {% for discount in checkout.discounts %}
+                    'promo_code' : {'t': 'string', 'v': {{discount.code | json}} },
+                    'discount'  : {'t': 'number', 'v': {{discount.amount | money_without_currency | json}} },
+                    {% endfor %}
+                };
+                            
+                transactionData["content_type"] = {"t": "string", "v": "product_group"};
+                transactionData["currency"] = {"t": "string", "v": {{ checkout.currency | json}}};
+                
+                /*
+                * If you want the purchase value to be without shipping cost,
+                * Just replace `checkout.total_price` with `checkout.subtotal_price` in below line
+                */
+                transactionData["value"] = {"t": "number", "v": Number('{{shop.money_format}}'.includes('with_comma_separator') ? {{checkout.total_price | money_without_currency | remove: "." | json}}.replace(',', '.') : {{checkout.total_price | money_without_currency | remove: "," | json}})};
+                
+                var propertiesToSend = {
+                    'customProperties': transactionData,
+                    'productProperties': products
+                };
+
+                if(transactionData.transaction_id && transactionData.transaction_id.v && window.localStorage){
+                    var purchases_str = localStorage.getItem('cl_past_purchases') || "{}";
+                    var purchases = JSON.parse(purchases_str);
+                    if(!purchases[transactionData.transaction_id.v]){
+                        _cl.trackClick('Purchased', propertiesToSend);
+                        purchases[transactionData.transaction_id.v] = "true";
+                        window.localStorage.setItem("cl_past_purchases", JSON.stringify(purchases));
+                    }
+                }else{
+                    _cl.trackClick('Purchased', propertiesToSend);
+                }
+
+                var cltraits = {
+                    'email'     : {{checkout.email | json}},
+                    'fullName'  : {{checkout.billing_address.name | json}},
+                    'firstName' : {{checkout.billing_address.first_name | json}},
+                    'lastName'  : {{checkout.billing_address.last_name | json}},
+                    'address1'  : {{checkout.billing_address.address1 | json}},
+                    'address2'  : {{checkout.billing_address.address2 | json}},
+                    'street'    : {{checkout.billing_address.street | json}},
+                    'city'      : {{checkout.billing_address.city | json}},
+                    'province'  : {{checkout.billing_address.province | json}},
+                    'zip'       : {{checkout.billing_address.zip | json}},
+                    'country'   : {{checkout.billing_address.country | json}},
+                    'phone'     : {{checkout.billing_address.phone | json}},
+                }
+
+                if(cltraits["email"]){
+                    var user_traits = {}
+                    for(var trait in cltraits){
+                        if(cltraits[trait]){
+                            user_traits[trait] = {
+                                "t": "string",
+                                "v": cltraits[trait]
+                            }
                         }
                     }
+                    var props = {
+                        "customProperties": {
+                            "user_traits": {
+                                "t": "Object",
+                                "v": user_traits
+                            },
+                            "identify_by_email": {
+                                "t":"string",
+                                "v": cltraits["email"],
+                                "ib": true
+                            }
+                        }
+                    }
+                    _cl.identify(props)
                 }
-                _cl.identify(props)
-            }
-
+            {% endif %}
         {% endunless %}
             
     }
