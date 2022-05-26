@@ -132,8 +132,8 @@ window.clShopifyTrack = function() {
         'customerEmail' : {{customer.email | json}},
         'logState'      : "Logged In",
         'customerInfo'  : {
-            'firstName'   : {{customer_address.first_name | json}},
-            'lastName'    : {{customer_address.last_name | json}},
+            'first_name'   : {{customer_address.first_name | json}},
+            'last_name'    : {{customer_address.last_name | json}},
             'address1'    : {{customer_address.address1 | json}},
             'address2'    : {{customer_address.address2 | json}},
             'street'      : {{customer_address.street | json}},
@@ -160,9 +160,9 @@ window.clShopifyTrack = function() {
         'customerTypeNumber' :'1', 
         {% endif %}
         'shippingInfo' : {
-            'fullName'  : {{checkout.shipping_address.name | json}},
-            'firstName' : {{checkout.shipping_address.first_name | json}},
-            'lastName'  : {{checkout.shipping_address.last_name | json}},
+            'full_name'  : {{checkout.shipping_address.name | json}},
+            'first_name' : {{checkout.shipping_address.first_name | json}},
+            'last_name'  : {{checkout.shipping_address.last_name | json}},
             'address1'  : {{checkout.shipping_address.address1 | json}},
             'address2'  : {{checkout.shipping_address.address2 | json}},
             'street'    : {{checkout.shipping_address.street | json}},
@@ -173,9 +173,9 @@ window.clShopifyTrack = function() {
             'phone'     : {{checkout.shipping_address.phone | json}},
         },
         'billingInfo' : {
-            'fullName'  : {{checkout.billing_address.name | json}},
-            'firstName' : {{checkout.billing_address.first_name | json}},
-            'lastName'  : {{checkout.billing_address.last_name | json}},
+            'full_name'  : {{checkout.billing_address.name | json}},
+            'first_name' : {{checkout.billing_address.first_name | json}},
+            'last_name'  : {{checkout.billing_address.last_name | json}},
             'address1'  : {{checkout.billing_address.address1 | json}},
             'address2'  : {{checkout.billing_address.address2 | json}},
             'street'    : {{checkout.billing_address.street | json}},

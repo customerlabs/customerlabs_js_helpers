@@ -1,4 +1,19 @@
 <script id="cl_addition_scrip" type="text/javascript">
+    var clearObject = function(obj){
+        var newObj = Object.assign({}, obj)
+        for (const key in newObj) {
+            var element = newObj[key];
+            if (typeof element == "string") {
+                if (element.length == 0) {
+                    delete newObj[key];
+                }
+            }
+            if (!element) {
+                delete newObj[key];
+            }
+        }
+        return newObj;
+    };
     window.clShopifyTrack = function(){
         {% unless post_purchase_page_accessed %}
             {% if first_time_accessed %}
@@ -58,20 +73,18 @@
                     _cl.trackClick('Purchased', propertiesToSend);
                 }
 
-                var cltraits = {
-                    'email'     : {{checkout.email | json}},
-                    'fullName'  : {{checkout.billing_address.name | json}},
-                    'firstName' : {{checkout.billing_address.first_name | json}},
-                    'lastName'  : {{checkout.billing_address.last_name | json}},
-                    'address1'  : {{checkout.billing_address.address1 | json}},
-                    'address2'  : {{checkout.billing_address.address2 | json}},
-                    'street'    : {{checkout.billing_address.street | json}},
-                    'city'      : {{checkout.billing_address.city | json}},
-                    'province'  : {{checkout.billing_address.province | json}},
-                    'zip'       : {{checkout.billing_address.zip | json}},
-                    'country'   : {{checkout.billing_address.country | json}},
-                    'phone'     : {{checkout.billing_address.phone | json}},
-                }
+                var checkout_billing_address = clearObject({{checkout.billing_address | json}} || {});
+                var checkout_shipping_address = clearObject({{checkout.shipping_address | json}} || {});
+                var order_billing_address = clearObject({{order.billing_address | json}} || {});
+                var order_shipping_address = clearObject({{order.shipping_address | json}} || {});
+
+                var checkout_address = Object.assign({}, checkout_billing_address, checkout_shipping_address);
+                var order_address = Object.assign({}, order_billing_address, order_shipping_address);
+
+
+                var cltraits = Object.assign({}, checkout_address, order_address);
+
+                cltraits["email"] = {{order.email | json}} || {{checkout.email | json}};
 
                 if(cltraits["email"]){
                     var user_traits = {}
