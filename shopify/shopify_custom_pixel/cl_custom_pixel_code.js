@@ -1,86 +1,87 @@
-//CustomerLabs Tag - Tracking code - custom pixel code start
-!function(t,e,r,c,a,n,s){t.ClAnalyticsObject=a,t[a]=t[a]||[],t[a].methods=["trackSubmit","trackClick","pageview","identify","track"],t[a].factory=function(e){return function(){var r=Array.prototype.slice.call(arguments);return r.unshift(e),t[a].push(r),t[a]}};for(var i=0;i<t[a].methods.length;i++){var o=t[a].methods[i];t[a][o]=t[a].factory(o)};n=e.createElement(r),s=e.getElementsByTagName(r)[0],n.async=1,n.crossOrigin="anonymous",n.src=c,s.parentNode.insertBefore(n,s)}(window,document,"script","//cdn.js.customerlabs.co/cl5378d2tsjsmq.js","_cl");_cl.SNIPPET_VERSION="1.0.0"
-
-//Shopify standard events:
-//@productsConversion function Converts product list to customerlabs product properties format
-function productsConversion(products) {
-    var productsArr = products;
-    var productsData = []
-    for(let i = 0 ; i < productsArr.length ; i++) {
-        var productsStructure = {}
-        for(var key in productsArr[i]) {
+//CustomerLabs Tracking code - Custom pixel code start
+var CLabs_app_id = 'cl52245rzxaetx'; //"CUSTOMERLABS APP ID"
+!function(t,e,r,c,a,n,s){t.ClAnalyticsObject=a,t[a]=t[a]||[],t[a].methods=["trackSubmit","trackClick","pageview","identify","track"],t[a].factory=function(e){return function(){var r=Array.prototype.slice.call(arguments);return r.unshift(e),t[a].push(r),t[a]}};for(var i=0;i<t[a].methods.length;i++){var o=t[a].methods[i];t[a][o]=t[a].factory(o)}n=e.createElement(r),s=e.getElementsByTagName(r)[0],n.async=1,n.crossOrigin="anonymous",n.src=c,s.parentNode.insertBefore(n,s)}(window,document,"script","//cdn.js.customerlabs.co/"+CLabs_app_id+".js","_cl");_cl.SNIPPET_VERSION="1.0.0"
+/**
+ * Shopify standard events:
+ * @function CLabs_products_mappings
+ * @params products array
+ * function Converts product list to customerlabs product properties format
+**/
+function CLabs_products_mappings(products) {
+    var CLabs_product_data = [];
+    for(let i = 0 ; i < products.length ; i++) {
+        var CLabs_product = {}
+        for(var key in products[i]) {
             switch(key) {
                 case "name":
                 case "title":
-                productsStructure.product_name = {"t": "string", "v": productsArr[i][key]}
+                    CLabs_product.product_name = {"t": "string", "v": products[i][key]}
                 break;
                 case "id":
-                productsStructure.product_id = {"t": "string", "v": productsArr[i].id}
+                    CLabs_product.product_id = {"t": "string", "v": products[i].id}
                 break;
                 case "price":
-                productsStructure.product_price = {"t": "number", "v": productsArr[i].price}
+                    CLabs_product.product_price = {"t": "number", "v": products[i].price}
                 break;
                 case "category":
-                productsStructure.product_category = {"t": "string", "v": productsArr[i].category}
+                    CLabs_product.product_category = {"t": "string", "v": products[i].category}
                 break;
                 case "brand":
-                productsStructure.product_brand = {"t": "string", "v": productsArr[i].brand}
+                    CLabs_product.product_brand = {"t": "string", "v": products[i].brand}
                 break;
                 case "variant":
-                productsStructure.product_variant = {"t": "string", "v": productsArr[i].variant}
-                break;
-                case "variantId":
-                productsStructure.product_variant_id = {"t": "string", "v": productsArr[i].variantId}
+                    CLabs_product.product_variant = {"t": "string", "v": products[i].variant}
                 break;
                 case "productType":
-                productsStructure.product_type = {"t": "string", "v": productsArr[i].productType}
+                    CLabs_product.product_type = {"t": "string", "v": products[i].productType}
                 break;
                 case "coupon":
-                productsStructure.product_coupon = {"t": "string", "v": productsArr[i].coupon}
+                    CLabs_product.product_coupon = {"t": "string", "v": products[i].coupon}
                 break;
                 case "quantity":
-                productsStructure.product_quantity = {"t": "string", "v": productsArr[i].quantity}
+                    CLabs_product.product_quantity = {"t": "string", "v": products[i].quantity}
                 break;
                 default:
-                let isnum = /^\d+$/.test(productsArr[i][key]);
-                var type = ""
-
-                if(Array.isArray(productsArr[i][key])) {
-                    continue;
-                } else if(typeof productsArr[i][key] === 'object' && productsArr[i][key] !== null && !Array.isArray(productsArr[i][key])) {
-                    continue;
-                } else if(productsArr[i][key] !== null && (Number.isFinite(productsArr[i][key]) || isnum || !isNaN(parseFloat(productsArr[i][key])))) {
-                    type = "number"
-                }  else {
-                    type = "string"
-                }
-                if(key.substring(0, 8) === "product_") {
-                    productsStructure[key] = {"t": type, "v": productsArr[i][key]}
-                } else {
-                    productsStructure["product_"+key] = {"t": type, "v": productsArr[i][key]}
-                }
+                    let isnum = /^\d+$/.test(products[i][key]);
+                    var type = ""
+                    if(Array.isArray(products[i][key])) {
+                        continue;
+                    } else if(typeof products[i][key] === 'object' && products[i][key] !== null && !Array.isArray(products[i][key])) {
+                        continue;
+                    } else if(products[i][key] !== null && (Number.isFinite(products[i][key]) || isnum || !isNaN(parseFloat(products[i][key])))) {
+                        type = "number"
+                    }  else {
+                        type = "string"
+                    }
+                    if(key.substring(0, 8) === "product_") {
+                        CLabs_product[key] = {"t": type, "v": products[i][key]}
+                    } else {
+                        CLabs_product["product_"+key] = {"t": type, "v": products[i][key]}
+                    }
             }
         }
-        productsData.push(productsStructure);
+        CLabs_product_data.push(CLabs_product);
     }
-    return productsData
+    return CLabs_product_data
 }
-//@productsData function Converts received event data to products list format
-function productsData(event) {
-   var products_list = []
-   var products_length = event.data.checkout.lineItems.length;
+/**
+ * @function shopify_products_mapping
+ * @params items array
+ * function Converts product list to customerlabs product properties format
+**/
+function shopify_products_mapping(items) {
+   var products_list = [];
+   var products_length = items.length;
    if(products_length > 0){
      for(var i=0;i< products_length;i++){
        var products = {
-          'id'              : event.data.checkout.lineItems[i].variant.product.id,
-          'sku'             : event.data.checkout.lineItems[i].variant.sku,
-          'variantId'       : event.data.checkout.lineItems[i].variant.id,
-          'name'            : event.data.checkout.lineItems[i].variant.product.title,
-          'price'           : event.data.checkout.lineItems[i].variant.price.amount,
-          'imageURL'        : event.data.checkout.lineItems[i].variant.image.src, 
-          'productURL'      : event.context.window.location.href,
-          'brand'           : event.data.checkout.lineItems[i].variant.product.vendor,
-          'quantity'        : event.data.checkout.lineItems[i].quantity
+          'id'              : items[i].variant.product.id,
+          'sku'             : items[i].variant.sku,
+          'name'            : items[i].variant.product.title,
+          'price'           : items[i].variant.price.amount,
+          'imageURL'        : items[i].variant.image.src, 
+          'brand'           : items[i].variant.product.vendor,
+          'quantity'        : items[i].quantity
         }
         products_list.push(products)
      }
@@ -110,11 +111,9 @@ analytics.subscribe("product_viewed", event => {
         'products': [{
             'id'              : event.data.productVariant.product.id,
             'sku'             : event.data.productVariant.sku,
-            'variantId'       : event.data.productVariant.id,
             'name'            : event.data.productVariant.product.title,
             'price'           : event.data.productVariant.price.amount,
             'imageURL'        : event.data.productVariant.image.src, 
-            'productURL'      : event.context.window.location.href,
             'brand'           : event.data.productVariant.product.vendor
         }]
     };
@@ -122,14 +121,15 @@ analytics.subscribe("product_viewed", event => {
         "currency": {
           't': 'string',
           'v': event.data.productVariant.price.currencyCode
+        },
+        "url":{
+          't': 'string',
+          'v': event.context.window.location.href
         }
     };
-    var productData = productsConversion(product.products);
+    var productData = CLabs_products_mappings(product.products);
     if(productData[0].product_price){
         custom_data.value = productData[0].product_price;
-    }
-    if(productData[0].product_productURL){
-        custom_data.url = productData[0].product_productURL;
     }
     var properties = {
         'customProperties'  : custom_data,
@@ -148,11 +148,9 @@ analytics.subscribe("product_viewed", event => {
         'products': [{
             'id'              : event.data.productVariant.product.id,
             'sku'             : event.data.productVariant.sku,
-            'variantId'       : event.data.productVariant.id,
             'name'            : event.data.productVariant.product.title,
             'price'           : event.data.productVariant.price.amount,
             'imageURL'        : event.data.productVariant.image.src, 
-            'productURL'      : event.context.window.location.href,
             'brand'           : event.data.productVariant.product.vendor
         }]
     };
@@ -160,14 +158,15 @@ analytics.subscribe("product_viewed", event => {
         "currency": {
           't': 'string',
           'v': event.data.productVariant.price.currencyCode
+        },
+        "url": {
+          't': 'string',
+          'v': event.context.window.location.href
         }
     };
-    var productData = productsConversion(product.products);
+    var productData = CLabs_products_mappings(product.products);
     if(productData[0].product_price){
         custom_data.value = productData[0].product_price;
-    }
-    if(productData[0].product_productURL){
-        custom_data.url = productData[0].product_productURL;
     }
     var properties = {
         'customProperties'  : custom_data,
@@ -211,29 +210,27 @@ analytics.subscribe("product_added_to_cart", event => {
         'products': [{
             'id'              : event.data.cartLine.merchandise.product.id,
             'sku'             : event.data.cartLine.merchandise.sku,
-            'variantId'       : event.data.cartLine.merchandise.id,
             'name'            : event.data.cartLine.merchandise.product.title,
             'price'           : event.data.cartLine.merchandise.price.amount,
             'imageURL'        : event.data.cartLine.merchandise.image.src, 
-            'productURL'      : event.context.window.location.href,
             'brand'           : event.data.cartLine.merchandise.product.vendor,
             'quantity'        : event.data.cartLine.quantity
         }]
     };
-    var productData = productsConversion(product.products);
+    var productData = CLabs_products_mappings(product.products);
     var custom_data = {
-        "value":{
-            't': 'number',
-            'v': event.data.cartLine.cost.totalAmount.amount
-        
-        },
         "currency": {
             't': 'string',
             'v': event.data.cartLine.cost.totalAmount.currencyCode
+        },
+        "url": {
+            't': 'string',
+            'v': event.context.window.location.href
+        },
+        "value":{
+            't': 'number',
+            'v': event.data.cartLine.cost.totalAmount.amount
         }
-    }
-    if(productData[0].product_productURL){
-        custom_data.url = productData[0].product_productURL;
     }
     var properties = {
         'customProperties'  : custom_data,
@@ -269,16 +266,17 @@ analytics.subscribe("search_submitted", event => {
 });
 //Checkout made event
 analytics.subscribe("checkout_started", event => {
-    var product = productsData(event);
-    var productData = productsConversion(product);
+    var product_items = event.data.checkout.lineItems;
+    var product = shopify_products_mapping(product_items);
+    var productData = CLabs_products_mappings(product);
     var custom_data = {
-        "value":{
-            't': 'number',
-            'v': event.data.checkout.totalPrice.amount
-        },
         "currency": {
             't': 'string',
             'v': event.data.checkout.totalPrice.currencyCode
+        },
+        "value":{
+            't': 'number',
+            'v': event.data.checkout.totalPrice.amount
         }
         
     }
@@ -368,20 +366,33 @@ analytics.subscribe("payment_info_submitted", event => {
 });
 //Purchased event
 analytics.subscribe("checkout_completed", event => {
-    var product = productsData(event);
-    var productData = productsConversion(product);
+    var product_items = event.data.checkout.lineItems;
+    var product = shopify_products_mapping(product_items);
+    var productData = CLabs_products_mappings(product);
     var custom_data = {
-        "orderId":{
+        "transaction_id":{
             't': 'string',
             'v': event.data.checkout.order.id
-        },
-        "value":{
-            't': 'number',
-            'v': event.data.checkout.totalPrice.amount
         },
         "currency": {
             't': 'string',
             'v': event.data.checkout.totalPrice.currencyCode
+        },
+        "subtotal": {
+            "t": "number",
+            "v": event.data.checkout.subtotalPrice.amount
+        },
+        "tax" : {
+            "t": "number",
+            "v": event.data.checkout.totalTax.amount
+        },
+        "shipping" : {
+            "t": "number",
+            "v": event.data.checkout.shippingPrice.amount
+        },
+        "value":{
+            't': 'number',
+            'v': event.data.checkout.totalPrice.amount
         }
     }
     var properties = {
