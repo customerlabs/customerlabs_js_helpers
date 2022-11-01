@@ -1,17 +1,17 @@
 /**
  * CustomerLabs Tracking code - Custom pixel code for shopify 
  * Find your Account Id at the top right navbar dropdown
- * Copy your account id and replace the text 'CUSTOMELABS_APP_ID' to your account id to assign the 'customerlabs_app_id' value.
+ * Copy your account id and replace the text "CUSTOMELABS_APP_ID" to your account id to assign the "customerlabs_app_id" value.
  * */
 
-var customerlabs_app_id = 'cl52245rzxaetx'; //"CUSTOMELABS_APP_ID";
+var customerlabs_app_id = "CUSTOMELABS_APP_ID";
 !function(t,e,r,c,a,n,s){t.ClAnalyticsObject=a,t[a]=t[a]||[],t[a].methods=["trackSubmit","trackClick","pageview","identify","track"],t[a].factory=function(e){return function(){var r=Array.prototype.slice.call(arguments);return r.unshift(e),t[a].push(r),t[a]}};for(var i=0;i<t[a].methods.length;i++){var o=t[a].methods[i];t[a][o]=t[a].factory(o)}n=e.createElement(r),s=e.getElementsByTagName(r)[0],n.async=1,n.crossOrigin="anonymous",n.src=c,s.parentNode.insertBefore(n,s)}(window,document,"script","//cdn.js.customerlabs.co/"+customerlabs_app_id+".js","_cl");_cl.SNIPPET_VERSION="1.0.0"
 
 /**
-* DYNAMIC DEPENDENCIES
+* @variable contains debug and fb_skip_contents
 **/
-var __DL__ = {
-    debug: true, // if true, console messages will be display
+var __CL__ = {
+    debug: false, // if true, console messages will be display
     fb_skip_contents: false
 };
 
@@ -28,37 +28,37 @@ function clabs_product_mappings(products) {
                 case "name":
                 case "title":
                     clabs_product.product_name = {"t": "string", "v": products[i][key]}
-                break;
+                    break;
                 case "id":
                     clabs_product.product_id = {"t": "string", "v": products[i].id}
-                break;
+                    break;
                 case "price":
                     clabs_product.product_price = {"t": "number", "v": products[i].price}
-                break;
+                    break;
                 case "category":
                     clabs_product.product_category = {"t": "string", "v": products[i].category}
-                break;
+                    break;
                 case "brand":
                     clabs_product.product_brand = {"t": "string", "v": products[i].brand}
-                break;
+                    break;
                 case "variant":
                     clabs_product.product_variant = {"t": "string", "v": products[i].variant}
-                break;
+                    break;
                 case "productType":
                     clabs_product.product_type = {"t": "string", "v": products[i].productType}
-                break;
+                    break;
                 case "coupon":
                     clabs_product.product_coupon = {"t": "string", "v": products[i].coupon}
-                break;
+                    break;
                 case "quantity":
                     clabs_product.product_quantity = {"t": "string", "v": products[i].quantity}
-                break;
+                    break;
                 default:
                     let isnum = /^\d+$/.test(products[i][key]);
                     var type = ""
                     if(Array.isArray(products[i][key])) {
                         continue;
-                    } else if(typeof products[i][key] === 'object' && products[i][key] !== null && !Array.isArray(products[i][key])) {
+                    } else if(typeof products[i][key] === "object" && products[i][key] !== null && !Array.isArray(products[i][key])) {
                         continue;
                     } else if(products[i][key] !== null && (Number.isFinite(products[i][key]) || isnum || !isNaN(parseFloat(products[i][key])))) {
                         type = "number"
@@ -84,20 +84,102 @@ function clabs_product_mappings(products) {
 function shopify_products_mapping(items) {
    var products = [];
    if(items.length > 0){
-     for(var i=0;i< items.length;i++){
-       var product = {
-          'id'              : items[i].variant.product.id,
-          'sku'             : items[i].variant.sku,
-          'name'            : items[i].variant.product.title,
-          'price'           : items[i].variant.price.amount,
-          'imageURL'        : items[i].variant.image.src, 
-          'brand'           : items[i].variant.product.vendor,
-          'quantity'        : items[i].quantity
+        for(var i=0;i< items.length;i++){
+        var product = {
+            "id"              : items[i].variant.product.id,
+            "sku"             : items[i].variant.sku,
+            "name"            : items[i].variant.product.title,
+            "price"           : items[i].variant.price.amount,
+            "imageURL"        : items[i].variant.image.src, 
+            "brand"           : items[i].variant.product.vendor,
+            "quantity"        : items[i].quantity
+            }
+            products.push(product)
         }
-        products.push(product)
-     }
-   }
+    }
    return products;
+}
+
+/**
+ * @function identify_properties_mapping
+ * @params properties
+ */
+function identify_properties_mapping(properties) {
+    var  identify_properties = {
+       "email"              : properties.email,
+       "phone"              : properties.phone,
+       "city"               : properties.shippingAddress.city,
+       "country"            : properties.shippingAddress.country,
+       "country_code"       : properties.shippingAddress.countryCode,
+       "state"              : properties.shippingAddress.province,
+    }
+    console.log(identify_properties)
+    return identify_properties;
+}
+
+/**
+ * @function cl_identify_properties_formating
+ * @params properties
+ */
+function cl_identify_properties_formating(properties) {
+    var clabs_properties = {}
+    for(var key in properties) {
+      if(properties[key]!=null){
+        switch(key) {
+            case "email":
+                clabs_properties.email = {"t": "string", "v": properties[key]}
+                break;
+            case "phone":
+                clabs_properties.phone = {"t": "string", "v": properties[key]}
+                break;
+            case "city":
+                clabs_properties.city = {"t": "string", "v": properties[key]}
+                break;
+            case "country":
+                clabs_properties.country = {"t": "string", "v": properties[key]}
+                break;
+            case "country_code":
+                clabs_properties.country_code = {"t": "string", "v": properties[key]}
+                break;
+            case "state":
+                clabs_properties.state = {"t": "string", "v": properties[key]}
+                break;
+        }
+      }
+    }
+    return clabs_properties
+}
+
+/**
+ * @function cl_identify_properties_to_send
+ * @params event
+ */
+function cl_identify_properties_to_send(event){
+    var identify_properties = identify_properties_mapping(event.data.checkout);
+    var user_traits_object = cl_identify_properties_formating(identify_properties);
+    var propertiesToSend = {
+        "customProperties": {
+            "user_traits": {
+            "t": "Object",
+            "v": user_traits_object
+            }
+        }
+    }
+    if(user_traits_object.email){
+        propertiesToSend.customProperties.identify_by_email = {
+            "t":"string",
+            "v": user_traits_object.email.v,
+            "ib": true
+            }
+    }
+    if(user_traits_object.phone){
+        propertiesToSend.customProperties.identify_by_phone = {
+            "t":"string",
+            "v": user_traits_object.phone.v,
+            "ib": true
+            }
+    }
+    return propertiesToSend
 }
 
 /**
@@ -105,6 +187,7 @@ function shopify_products_mapping(items) {
  * This function triggers default shopify standard events
 **/
 window.clShopifyTrack = function() {
+    window._cl.SHOPIFY_SANDBOX_ENV = true;
     //pageview event
     analytics.subscribe("page_viewed", event => {
         var properties = {
@@ -115,32 +198,36 @@ window.clShopifyTrack = function() {
                 }
             }
         };
-        _cl.pageview('pageview',properties);
-        if (__DL__.debug) {
-            console.log("pageview"+" :"+JSON.stringify(properties));
+        _cl.pageview("pageview", properties);
+        if (__CL__.debug) {
+            console.log("pageview"+ ":" + JSON.stringify(properties));
         }
     });
     //Product viewed event
     analytics.subscribe("product_viewed", event => {
         var product = {
-            'id'              : event.data.productVariant.product.id,
-            'sku'             : event.data.productVariant.sku,
-            'name'            : event.data.productVariant.product.title,
-            'price'           : event.data.productVariant.price.amount,
-            'imageURL'        : event.data.productVariant.image.src, 
-            'brand'           : event.data.productVariant.product.vendor
+            "id"              : event.data.productVariant.product.id,
+            "sku"             : event.data.productVariant.sku,
+            "name"            : event.data.productVariant.product.title,
+            "price"           : event.data.productVariant.price.amount,
+            "imageURL"        : event.data.productVariant.image.src, 
+            "brand"           : event.data.productVariant.product.vendor
         };
         var customData = {
             "currency": {
-                't': 'string',
-                'v': event.data.productVariant.price.currencyCode
+                "t": "string",
+                "v": event.data.productVariant.price.currencyCode
             },
             "url":{
-                't': 'string',
-                'v': event.context.window.location.href
+                "t": "string",
+                "v": event.context.window.location.href
+            },
+            "content_type": {
+                "t": "string",
+                "v": "product_group"
             }
         };
-        if(__DL__.fb_skip_contents){
+        if(__CL__.fb_skip_contents){
             customData.skip_contents = true;
         }
         var productData = clabs_product_mappings([product]);
@@ -148,12 +235,12 @@ window.clShopifyTrack = function() {
             customData.value = productData[0].product_price;
         }
         var properties = {
-            'customProperties'  : customData,
-            'productProperties' : productData
+            "customProperties"  : customData,
+            "productProperties" : productData
         };
-        _cl.trackClick('Product viewed',properties);
-        if (__DL__.debug) {
-            console.log("Product viewed"+" :"+JSON.stringify(properties));
+        _cl.trackClick("Product viewed", properties);
+        if (__CL__.debug) {
+            console.log("Product viewed"+ " :" + JSON.stringify(properties));
         }
     });
     //Category viewed
@@ -174,65 +261,65 @@ window.clShopifyTrack = function() {
                 }
             }
         };
-        _cl.pageview('Category viewed',properties);
-        if (__DL__.debug) {
-            console.log("Category viewed"+" :"+JSON.stringify(properties));
+        _cl.pageview("Category viewed", properties);
+        if (__CL__.debug) {
+            console.log("Category viewed"+ " :" + JSON.stringify(properties));
         } 
     });
     //Added to cart event
     analytics.subscribe("product_added_to_cart", event => {
         var product = {
-            'id'              : event.data.cartLine.merchandise.product.id,
-            'sku'             : event.data.cartLine.merchandise.sku,
-            'name'            : event.data.cartLine.merchandise.product.title,
-            'price'           : event.data.cartLine.merchandise.price.amount,
-            'imageURL'        : event.data.cartLine.merchandise.image.src, 
-            'brand'           : event.data.cartLine.merchandise.product.vendor,
-            'quantity'        : event.data.cartLine.quantity
+            "id"              : event.data.cartLine.merchandise.product.id,
+            "sku"             : event.data.cartLine.merchandise.sku,
+            "name"            : event.data.cartLine.merchandise.product.title,
+            "price"           : event.data.cartLine.merchandise.price.amount,
+            "imageURL"        : event.data.cartLine.merchandise.image.src, 
+            "brand"           : event.data.cartLine.merchandise.product.vendor,
+            "quantity"        : event.data.cartLine.quantity
         };
         var productData = clabs_product_mappings([product]);
         var customData = {
             "currency": {
-                't': 'string',
-                'v': event.data.cartLine.cost.totalAmount.currencyCode
+                "t": "string",
+                "v": event.data.cartLine.cost.totalAmount.currencyCode
             },
             "url": {
-                't': 'string',
-                'v': event.context.window.location.href
+                "t": "string",
+                "v": event.context.window.location.href
             },
             "value":{
-                't': 'number',
-                'v': event.data.cartLine.cost.totalAmount.amount
+                "t": "number",
+                "v": event.data.cartLine.cost.totalAmount.amount
             }
         }
-        if(__DL__.fb_skip_contents){
+        if(__CL__.fb_skip_contents){
             customData.skip_contents = true;
         }
         var properties = {
-            'customProperties'  : customData,
-            'productProperties' : productData
+            "customProperties"  : customData,
+            "productProperties" : productData
         };
-        _cl.trackClick('Added to cart',properties); 
-        if (__DL__.debug) {
+        _cl.trackClick("Added to cart",properties); 
+        if (__CL__.debug) {
             console.log("Added to cart"+" :"+JSON.stringify(properties));
         } 
     });
     //Search made event
     analytics.subscribe("search_submitted", event => {
         var properties = {
-            'customProperties' : {
-                'search_string': {
-                    't': 'string',
-                    'v': event.data.searchResult.query
+            "customProperties" : {
+                "search_string": {
+                    "t": "string",
+                    "v": event.data.searchResult.query
                 },
-                'url': {
-                't': 'string',
-                'v': event.context.window.location.href
+                "url": {
+                    "t": "string",
+                    "v": event.context.window.location.href
                 }
             }
         }
-        _cl.pageview('Search made',properties);
-        if (__DL__.debug) {
+        _cl.pageview("Search made",properties);
+        if (__CL__.debug) {
             console.log("Search made"+" :"+JSON.stringify(properties));
         } 
     });
@@ -242,76 +329,56 @@ window.clShopifyTrack = function() {
         var productData = clabs_product_mappings(products);
         var customData = {
             "currency": {
-                't': 'string',
-                'v': event.data.checkout.totalPrice.currencyCode
+                "t": "string",
+                "v": event.data.checkout.totalPrice.currencyCode
             },
             "value":{
-                't': 'number',
-                'v': event.data.checkout.totalPrice.amount
+                "t": "number",
+                "v": event.data.checkout.totalPrice.amount
             }
         }
-        if(__DL__.fb_skip_contents){
+        if(__CL__.fb_skip_contents){
             customData.skip_contents = true;
         }
         var properties = {
-            'customProperties'  : customData,
-            'productProperties' : productData
+            "customProperties"  : customData,
+            "productProperties" : productData
         };
-        _cl.trackClick('Checkout made',properties);
-        if (__DL__.debug) {
+        _cl.trackClick("Checkout made",properties);
+        if (__CL__.debug) {
             console.log("Checkout made"+" :"+JSON.stringify(properties));
         } 
     });
     //AddPaymentinfo event
     analytics.subscribe("payment_info_submitted", event => {
-        var payment_info = {
+        var properties = {
             "subtotal":{
-            't': 'number',
-            'v': event.data.checkout.subtotalPrice.amount
+                "t": "number",
+                "v": event.data.checkout.subtotalPrice.amount
             },
             "shipping_price":{
-            't': 'number',
-            'v': event.data.checkout.shippingPrice.amount
+                "t": "number",
+                "v": event.data.checkout.shippingPrice.amount
             },
             "tax": {
-            't': 'string',
-            'v': event.data.checkout.totalTax.amount
+                "t": "string",
+                "v": event.data.checkout.totalTax.amount
             },
             "value": {
-            't': 'string',
-            'v': event.data.checkout.totalPrice.amount
+                "t": "string",
+                "v": event.data.checkout.totalPrice.amount
             },
             "currency": {
-                't': 'string',
-                'v': event.data.checkout.currencyCode
+                "t": "string",
+                "v": event.data.checkout.currencyCode
             } 
         }
-        var properties = {
-            "customProperties": {
-              "user_traits": {
-                "t": "Object",
-                "v": {
-                    "email": {
-                        "t": "string",
-                        "v": event.data.checkout.email
-                    },
-                    "phone": {
-                        "t": "number",
-                        "v": event.data.checkout.phone
-                    }
-                }
-              },
-              "identify_by_email": {
-                "t":"string",
-                "v": event.data.checkout.email,
-                "ib": true
-              }
-            }
-        }
-        _cl.trackClick('AddPaymentInfo',{'customProperties': payment_info});
-        _cl.identify(properties);
-        if (__DL__.debug) {
-            console.log("AddPaymentInfo"+" :"+JSON.stringify({'customProperties': payment_info}));
+        var propertiesToSend = cl_identify_properties_to_send(event);
+        _cl.trackClick("AddPaymentInfo",{"customProperties": properties});
+        console.log("propertiesToSend",propertiesToSend);
+        _cl.identify(propertiesToSend);
+        if (__CL__.debug) {
+            console.log("AddPaymentInfo"+" :"+JSON.stringify({"customProperties": payment_info}));
         } 
     });
     //Purchased event
@@ -320,12 +387,12 @@ window.clShopifyTrack = function() {
         var productData = clabs_product_mappings(products);
         var customData = {
             "transaction_id":{
-                't': 'string',
-                'v': event.data.checkout.order.id
+                "t": "string",
+                "v": event.data.checkout.order.id
             },
             "currency": {
-                't': 'string',
-                'v': event.data.checkout.totalPrice.currencyCode
+                "t": "string",
+                "v": event.data.checkout.totalPrice.currencyCode
             },
             "subtotal": {
                 "t": "number",
@@ -340,39 +407,19 @@ window.clShopifyTrack = function() {
                 "v": event.data.checkout.shippingPrice.amount
             },
             "value":{
-                't': 'number',
-                'v': event.data.checkout.totalPrice.amount
+                "t": "number",
+                "v": event.data.checkout.totalPrice.amount
             }
         }
         var properties = {
-            'customProperties'  : customData,
-            'productProperties' : productData
+            "customProperties"  : customData,
+            "productProperties" : productData
         };
-        var propertiesToSend = {
-            "customProperties": {
-              "user_traits": {
-                "t": "Object",
-                "v": {
-                    "email": {
-                        "t": "string",
-                        "v": event.data.checkout.email
-                    },
-                    "phone": {
-                        "t": "number",
-                        "v": event.data.checkout.phone
-                    }
-                }
-              },
-              "identify_by_email": {
-                "t":"string",
-                "v": event.data.checkout.email,
-                "ib": true
-              }
-            }
-        }
-        _cl.trackClick('Purchased',properties);
+        var propertiesToSend = cl_identify_properties_to_send(event);
+        _cl.trackClick("Purchased",properties);
+        console.log("propertiesToSend",propertiesToSend);
         _cl.identify(propertiesToSend);
-        if (__DL__.debug) {
+        if (__CL__.debug) {
             console.log("Purchased"+" :"+JSON.stringify(properties));
         } 
     });
