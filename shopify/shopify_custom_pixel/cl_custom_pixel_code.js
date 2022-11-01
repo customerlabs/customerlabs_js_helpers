@@ -1,7 +1,7 @@
 /**
  * CustomerLabs Tracking code - Custom pixel code for shopify 
- * Find your Account Id at the top right navbar dropdown
- * Copy your account id and replace the text "CUSTOMELABS_APP_ID" to your account id to assign the "customerlabs_app_id" value.
+ * Find your Account Id at the top right navbar dropdown in your customerlabs acccout
+ * Copy your account id and replace the text "CUSTOMELABS_APP_ID" with your account id to assign the "customerlabs_app_id" value.
  * */
 
 var customerlabs_app_id = "CUSTOMELABS_APP_ID";
