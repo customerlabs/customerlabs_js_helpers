@@ -308,7 +308,6 @@ window.clShopifyTrack = function() {
               }
             }
         }
-        console.log("identify",properties);
         _cl.trackClick('AddPaymentInfo',{'customProperties': payment_info});
         _cl.identify(properties);
         if (__DL__.debug) {
@@ -371,9 +370,8 @@ window.clShopifyTrack = function() {
               }
             }
         }
-        console.log("identify",propertiesToSend);
         _cl.trackClick('Purchased',properties);
-        _cl.identify(properties);
+        _cl.identify(propertiesToSend);
         if (__DL__.debug) {
             console.log("Purchased"+" :"+JSON.stringify(properties));
         } 
