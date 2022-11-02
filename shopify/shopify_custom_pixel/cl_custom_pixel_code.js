@@ -1,19 +1,42 @@
 /**
  * CustomerLabs Tracking code - Custom pixel code for shopify 
  * Find your Account Id at the top right navbar dropdown in your customerlabs acccout
- * Copy your account id and replace the text "CUSTOMELABS_APP_ID" with your account id to assign the "customerlabs_app_id" value.
+ * Copy your account id and replace the text "CUSTOMELABS_APP_ID" with your account id.
  * */
 
 var customerlabs_app_id = "CUSTOMELABS_APP_ID";
-!function(t,e,r,c,a,n,s){t.ClAnalyticsObject=a,t[a]=t[a]||[],t[a].methods=["trackSubmit","trackClick","pageview","identify","track"],t[a].factory=function(e){return function(){var r=Array.prototype.slice.call(arguments);return r.unshift(e),t[a].push(r),t[a]}};for(var i=0;i<t[a].methods.length;i++){var o=t[a].methods[i];t[a][o]=t[a].factory(o)}n=e.createElement(r),s=e.getElementsByTagName(r)[0],n.async=1,n.crossOrigin="anonymous",n.src=c,s.parentNode.insertBefore(n,s)}(window,document,"script","//cdn.js.customerlabs.co/"+customerlabs_app_id+".js","_cl");_cl.SNIPPET_VERSION="1.0.0"
+!function(t,e,r,c,a,n,s){t.ClAnalyticsObject=a,t[a]=t[a]||[],t[a].methods=["trackSubmit","trackClick","pageview","identify","track"],t[a].factory=function(e){return function(){var r=Array.prototype.slice.call(arguments);return r.unshift(e),t[a].push(r),t[a]}};for(var i=0;i<t[a].methods.length;i++){var o=t[a].methods[i];t[a][o]=t[a].factory(o)}n=e.createElement(r),s=e.getElementsByTagName(r)[0],n.async=1,n.crossOrigin="anonymous",n.src=c,s.parentNode.insertBefore(n,s)}(window,document,"script","//cdn.js.customerlabs.co/"+customerlabs_app_id+".js","_cl");_cl.SNIPPET_VERSION="1.0.0";_cl.SANDBOX_ENV=true;
 
 /**
-* @variable contains debug and fb_skip_contents
+* @variable  __CL__ contains debug and fb_skip_contents
 **/
 var __CL__ = {
     debug: false, // if true, console messages will be display
     fb_skip_contents: false
 };
+
+/**
+ * @function shopify_products_mapping
+ * @params items array
+**/
+function shopify_products_mapping(items) {
+   var products = [];
+   if(items.length > 0){
+        for(var i=0;i< items.length;i++){
+        var product = {
+            "id"              : items[i].variant.product.id,
+            "sku"             : items[i].variant.sku,
+            "name"            : items[i].variant.product.title,
+            "price"           : items[i].variant.price.amount,
+            "imageURL"        : items[i].variant.image.src, 
+            "brand"           : items[i].variant.product.vendor,
+            "quantity"        : items[i].quantity
+            }
+            products.push(product)
+        }
+    }
+   return products;
+}
 
 /**
  * @function clabs_product_mappings
@@ -78,31 +101,8 @@ function clabs_product_mappings(products) {
 }
 
 /**
- * @function shopify_products_mapping
- * @params items array
-**/
-function shopify_products_mapping(items) {
-   var products = [];
-   if(items.length > 0){
-        for(var i=0;i< items.length;i++){
-        var product = {
-            "id"              : items[i].variant.product.id,
-            "sku"             : items[i].variant.sku,
-            "name"            : items[i].variant.product.title,
-            "price"           : items[i].variant.price.amount,
-            "imageURL"        : items[i].variant.image.src, 
-            "brand"           : items[i].variant.product.vendor,
-            "quantity"        : items[i].quantity
-            }
-            products.push(product)
-        }
-    }
-   return products;
-}
-
-/**
  * @function identify_properties_mapping
- * @params properties
+ * @params properties object
  */
 function identify_properties_mapping(properties) {
     var  identify_properties = {
@@ -111,17 +111,16 @@ function identify_properties_mapping(properties) {
        "city"               : properties.shippingAddress.city,
        "country"            : properties.shippingAddress.country,
        "country_code"       : properties.shippingAddress.countryCode,
-       "state"              : properties.shippingAddress.province,
+       "state"              : properties.shippingAddress.province
     }
-    console.log(identify_properties)
     return identify_properties;
 }
 
 /**
- * @function cl_identify_properties_formating
- * @params properties
+ * @function identify_properties_formating
+ * @params properties object
  */
-function cl_identify_properties_formating(properties) {
+function identify_properties_formating(properties) {
     var clabs_properties = {}
     for(var key in properties) {
       if(properties[key]!=null){
@@ -151,33 +150,33 @@ function cl_identify_properties_formating(properties) {
 }
 
 /**
- * @function cl_identify_properties_to_send
+ * @function identify_properties_to_send
  * @params event
  */
-function cl_identify_properties_to_send(event){
+function identify_properties_to_send(event){
     var identify_properties = identify_properties_mapping(event.data.checkout);
-    var user_traits_object = cl_identify_properties_formating(identify_properties);
+    var user_traits_value = identify_properties_formating(identify_properties);
     var propertiesToSend = {
         "customProperties": {
             "user_traits": {
-            "t": "Object",
-            "v": user_traits_object
+                "t": "Object",
+                "v": user_traits_value
             }
         }
     }
-    if(user_traits_object.email){
+    if(user_traits_value.email){
         propertiesToSend.customProperties.identify_by_email = {
             "t":"string",
-            "v": user_traits_object.email.v,
+            "v": user_traits_value.email.v,
             "ib": true
-            }
+        }
     }
-    if(user_traits_object.phone){
+    if(user_traits_value.phone){
         propertiesToSend.customProperties.identify_by_phone = {
             "t":"string",
-            "v": user_traits_object.phone.v,
+            "v": user_traits_value.phone.v,
             "ib": true
-            }
+        }
     }
     return propertiesToSend
 }
@@ -187,22 +186,6 @@ function cl_identify_properties_to_send(event){
  * This function triggers default shopify standard events
 **/
 window.clShopifyTrack = function() {
-    window._cl.SHOPIFY_SANDBOX_ENV = true;
-    //pageview event
-    analytics.subscribe("page_viewed", event => {
-        var properties = {
-            "customProperties": {
-                "url":{
-                    "t": "string",
-                    "v": event.context.window.location.href
-                }
-            }
-        };
-        _cl.pageview("pageview", properties);
-        if (__CL__.debug) {
-            console.log("pageview"+ ":" + JSON.stringify(properties));
-        }
-    });
     //Product viewed event
     analytics.subscribe("product_viewed", event => {
         var product = {
@@ -240,7 +223,7 @@ window.clShopifyTrack = function() {
         };
         _cl.trackClick("Product viewed", properties);
         if (__CL__.debug) {
-            console.log("Product viewed"+ " :" + JSON.stringify(properties));
+            console.log("Product viewed"+" : "+ JSON.stringify(properties));
         }
     });
     //Category viewed
@@ -263,7 +246,7 @@ window.clShopifyTrack = function() {
         };
         _cl.pageview("Category viewed", properties);
         if (__CL__.debug) {
-            console.log("Category viewed"+ " :" + JSON.stringify(properties));
+            console.log("Category viewed"+" : "+ JSON.stringify(properties));
         } 
     });
     //Added to cart event
@@ -301,7 +284,7 @@ window.clShopifyTrack = function() {
         };
         _cl.trackClick("Added to cart",properties); 
         if (__CL__.debug) {
-            console.log("Added to cart"+" :"+JSON.stringify(properties));
+            console.log("Added to cart"+" : "+ JSON.stringify(properties));
         } 
     });
     //Search made event
@@ -320,7 +303,7 @@ window.clShopifyTrack = function() {
         }
         _cl.pageview("Search made",properties);
         if (__CL__.debug) {
-            console.log("Search made"+" :"+JSON.stringify(properties));
+            console.log("Search made"+" : "+ JSON.stringify(properties));
         } 
     });
     //Checkout made event
@@ -346,7 +329,7 @@ window.clShopifyTrack = function() {
         };
         _cl.trackClick("Checkout made",properties);
         if (__CL__.debug) {
-            console.log("Checkout made"+" :"+JSON.stringify(properties));
+            console.log("Checkout made"+" : "+ JSON.stringify(properties));
         } 
     });
     //AddPaymentinfo event
@@ -373,10 +356,9 @@ window.clShopifyTrack = function() {
                 "v": event.data.checkout.currencyCode
             } 
         }
-        var propertiesToSend = cl_identify_properties_to_send(event);
-        _cl.trackClick("AddPaymentInfo",{"customProperties": properties});
-        console.log("propertiesToSend",propertiesToSend);
+        var propertiesToSend = identify_properties_to_send(event);
         _cl.identify(propertiesToSend);
+        _cl.trackClick("AddPaymentInfo",{"customProperties": properties});
         if (__CL__.debug) {
             console.log("AddPaymentInfo"+" :"+JSON.stringify({"customProperties": payment_info}));
         } 
@@ -415,10 +397,9 @@ window.clShopifyTrack = function() {
             "customProperties"  : customData,
             "productProperties" : productData
         };
-        var propertiesToSend = cl_identify_properties_to_send(event);
-        _cl.trackClick("Purchased",properties);
-        console.log("propertiesToSend",propertiesToSend);
+        var propertiesToSend = identify_properties_to_send(event);
         _cl.identify(propertiesToSend);
+        _cl.trackClick("Purchased",properties);
         if (__CL__.debug) {
             console.log("Purchased"+" :"+JSON.stringify(properties));
         } 
