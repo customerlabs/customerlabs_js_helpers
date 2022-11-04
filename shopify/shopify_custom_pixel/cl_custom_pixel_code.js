@@ -4,8 +4,7 @@
  * Copy your account id and replace the text "CUSTOMELABS_ACCOUNT_ID" with your account id.
  * */
 
-var customerlabs_app_id = "CUSTOMELABS_ACCOUNT_ID";
-!function(t,e,r,c,a,n,s){t.ClAnalyticsObject=a,t[a]=t[a]||[],t[a].methods=["trackSubmit","trackClick","pageview","identify","track"],t[a].factory=function(e){return function(){var r=Array.prototype.slice.call(arguments);return r.unshift(e),t[a].push(r),t[a]}};for(var i=0;i<t[a].methods.length;i++){var o=t[a].methods[i];t[a][o]=t[a].factory(o)}n=e.createElement(r),s=e.getElementsByTagName(r)[0],n.async=1,n.crossOrigin="anonymous",n.src=c,s.parentNode.insertBefore(n,s)}(window,document,"script","//cdn.js.customerlabs.co/"+customerlabs_app_id+".js","_cl");_cl.SNIPPET_VERSION="1.0.0";_cl.SANDBOX_ENV=true;
+!function(t,e,r,c,a,n,s){t.ClAnalyticsObject=a,t[a]=t[a]||[],t[a].methods=["trackSubmit","trackClick","pageview","identify","track"],t[a].factory=function(e){return function(){var r=Array.prototype.slice.call(arguments);return r.unshift(e),t[a].push(r),t[a]}};for(var i=0;i<t[a].methods.length;i++){var o=t[a].methods[i];t[a][o]=t[a].factory(o)}n=e.createElement(r),s=e.getElementsByTagName(r)[0],n.async=1,n.crossOrigin="anonymous",n.src=c,s.parentNode.insertBefore(n,s)}(window,document,"script","//cdn.js.customerlabs.co/CUSTOMELABS_ACCOUNT_ID.js","_cl");_cl.SNIPPET_VERSION="1.0.0";_cl.SANDBOX_ENV=true;
 
 /**
 * @variable  __CL__ contains debug and fb_skip_contents
