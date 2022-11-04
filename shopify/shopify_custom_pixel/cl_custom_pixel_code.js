@@ -361,6 +361,7 @@ window.clShopifyTrack = function() {
         _cl.trackClick("AddPaymentInfo",{"customProperties": properties});
         if (__CL__.debug) {
             console.log("AddPaymentInfo"+" :"+JSON.stringify({"customProperties": payment_info}));
+            console.log("Create user"+" :"+JSON.stringify(propertiesToSend));
         } 
     });
     //Purchased event
@@ -402,6 +403,7 @@ window.clShopifyTrack = function() {
         _cl.trackClick("Purchased",properties);
         if (__CL__.debug) {
             console.log("Purchased"+" :"+JSON.stringify(properties));
+            console.log("Create user"+" :"+JSON.stringify(propertiesToSend));
         } 
     });
 }
