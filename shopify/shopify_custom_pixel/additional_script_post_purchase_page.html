@@ -1,0 +1,65 @@
+<script id="cl_additional_post_purchase_script" type="text/javascript">
+    window.clShopifyTrack = function(){
+        if (!window.Shopify.wasPostPurchasePageSeen) {
+            var order = window.Shopify.order;
+            var cltraits = order.customer;
+            if(cltraits["email"]){
+                var user_traits = {}
+                for(var trait in cltraits){
+                    if(cltraits[trait]){
+                        user_traits[trait] = {
+                            "t": "string",
+                            "v": cltraits[trait]
+                        }
+                    }
+                }
+                var props = {
+                    "customProperties": {
+                        "user_traits": {
+                            "t": "Object",
+                            "v": user_traits
+                        },
+                        "identify_by_email": {
+                            "t":"string",
+                            "v": cltraits["email"],
+                            "ib": true
+                        }
+                    }
+                }
+                _cl.identify(props)
+            }
+
+        }
+
+        Shopify.on('CheckoutAmended', function(newOrder, previousOrder) {
+            var order = newOrder;    
+            var cltraits = order.customer;
+            if(cltraits["email"]){
+                var user_traits = {}
+                for(var trait in cltraits){
+                    if(cltraits[trait]){
+                        user_traits[trait] = {
+                            "t": "string",
+                            "v": cltraits[trait]
+                        }
+                    }
+                }
+                var props = {
+                    "customProperties": {
+                        "user_traits": {
+                            "t": "Object",
+                            "v": user_traits
+                        },
+                        "identify_by_email": {
+                            "t":"string",
+                            "v": cltraits["email"],
+                            "ib": true
+                        }
+                    }
+                }
+                _cl.identify(props)
+            }  
+        });
+
+    }
+</script>
