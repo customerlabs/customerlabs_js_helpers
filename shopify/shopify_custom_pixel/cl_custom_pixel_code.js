@@ -367,7 +367,7 @@ window.clShopifyTrack = function() {
         var products = shopify_products_mapping(event.data.checkout.lineItems);
         var productData = clabs_product_mappings(products);
         var customData = {
-            "transaction_id":{
+            "transaction_number":{
                 "t": "string",
                 "v": event.data.checkout.order.id
             },
@@ -398,12 +398,12 @@ window.clShopifyTrack = function() {
         };
         var propertiesToSend = identify_properties_to_send(event);
         _cl.identify(propertiesToSend);
-        if(customData.transaction_id && customData.transaction_id.v && window.localStorage){
+        if(customData.transaction_number && customData.transaction_number.v && window.localStorage){
             var purchases_str = localStorage.getItem('cl_past_purchases') || "{}";
             var purchases = JSON.parse(purchases_str);
-            if(!purchases[customData.transaction_id.v]){
+            if(!purchases[customData.transaction_number.v]){
                 _cl.trackClick("Purchased",properties);
-                purchases[customData.transaction_id.v] = "true";
+                purchases[customData.transaction_number.v] = "true";
                 window.localStorage.setItem("cl_past_purchases", JSON.stringify(purchases));
             }
 

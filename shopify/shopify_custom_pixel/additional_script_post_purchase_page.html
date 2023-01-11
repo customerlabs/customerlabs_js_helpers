@@ -2,7 +2,51 @@
 <script id="cl_additional_post_purchase_script" type="text/javascript">
     window.clShopifyTrack = function(){
         if (!window.Shopify.wasPostPurchasePageSeen) {
+            
             var order = window.Shopify.order;
+
+            var products = order.lineItems.map(function(item){
+                return {
+                    "product_id": Number(item.id).toString(),
+                    "product_name": item.title,
+                    "product_category": item.product.type,
+                    "product_price": item.price,
+                    "product_quantity": item.quantity,
+                    "product_variant": Number(item.variant.sku).toString()
+                }
+            });
+            var propertiesToSend = {
+                "customProperties": {
+                    "transaction_id": {
+                        "t": "string",
+                        "v": Number(order.id).toString(),
+                    },
+                    "value": {
+                        "t": "number",
+                        "v": order.totalPrice
+                    },
+                    "currency": {
+                        "t": "string",
+                        "v": order.currency
+                    }
+                },
+                "productProperties": products
+            }
+
+            var transaction_id = Number(order.id).toString()
+
+            if(transaction_id && window.localStorage){
+                var purchases_str = localStorage.getItem('cl_past_purchases') || "{}";
+                var purchases = JSON.parse(purchases_str);
+                if(!purchases[transaction_id]){
+                    _cl.trackClick('Purchased', propertiesToSend);
+                    purchases[transaction_id] = "true";
+                    window.localStorage.setItem("cl_past_purchases", JSON.stringify(purchases));
+                }
+            }else{
+                _cl.trackClick('Purchased', propertiesToSend);
+            }
+            
             var cltraits = order.customer;
             if(cltraits["email"]){
                 var user_traits = {}
@@ -33,7 +77,50 @@
         }
 
         Shopify.on('CheckoutAmended', function(newOrder, previousOrder) {
-            var order = newOrder;    
+            // identify which items were recently added, if any
+            var oldItems = previousOrder.lineItems.map(function (line) { 
+                return line.id; 
+            });
+
+            var addedItems = newOrder.lineItems.filter(function (line) { 
+                return oldItems.indexOf(line.id) < 0; 
+            });
+
+            // no new items were added, so we skip conversion tracking
+            if (addedItems.length === 0) {
+                return;
+            }
+
+            var order = newOrder;
+            var products = addedItems.map(function(item){
+                return {
+                    "product_id": Number(item.id).toString(),
+                    "product_name": item.title,
+                    "product_category": item.product.type,
+                    "product_price": item.price,
+                    "product_quantity": item.quantity,
+                    "product_variant": Number(item.variant.sku).toString()
+                };
+            });
+            var propertiesToSend = {
+                "customProperties": {
+                    "transaction_id": {
+                        "t": "string",
+                        "v": Number(order.id).toString(),
+                    },
+                    "value": {
+                        "t": "number",
+                        "v": order.totalPrice
+                    },
+                    "currency": {
+                        "t": "string",
+                        "v": order.currency
+                    }
+                },
+                "productProperties": products
+            }
+            _cl.trackClick("Purchased", propertiesToSend);
+            
             var cltraits = order.customer;
             if(cltraits["email"]){
                 var user_traits = {}
