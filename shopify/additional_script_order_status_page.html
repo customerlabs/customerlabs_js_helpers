@@ -60,19 +60,19 @@
                     'customProperties': transactionData,
                     'productProperties': products
                 };
-
-                if(transactionData.transaction_id && transactionData.transaction_id.v && window.localStorage){
-                    var purchases_str = localStorage.getItem('cl_past_purchases') || "{}";
-                    var purchases = JSON.parse(purchases_str);
-                    if(!purchases[transactionData.transaction_id.v]){
+                setTimeout(function(){
+                    if(transactionData.transaction_number && transactionData.transaction_id.v && window.localStorage){
+                        var purchases_str = localStorage.getItem('cl_past_purchases') || "{}";
+                        var purchases = JSON.parse(purchases_str);
+                        if(!purchases[transactionData.transaction_id.v]){
+                            _cl.trackClick('Purchased', propertiesToSend);
+                            purchases[transactionData.transaction_id.v] = "true";
+                            window.localStorage.setItem("cl_past_purchases", JSON.stringify(purchases));
+                        }
+                    }else{
                         _cl.trackClick('Purchased', propertiesToSend);
-                        purchases[transactionData.transaction_id.v] = "true";
-                        window.localStorage.setItem("cl_past_purchases", JSON.stringify(purchases));
                     }
-                }else{
-                    _cl.trackClick('Purchased', propertiesToSend);
-                }
-
+                }, 3000)
                 var checkout_billing_address = clearObject({{checkout.billing_address | json}} || {});
                 var checkout_shipping_address = clearObject({{checkout.shipping_address | json}} || {});
                 var order_billing_address = clearObject({{order.billing_address | json}} || {});

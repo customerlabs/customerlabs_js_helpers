@@ -385,7 +385,7 @@ window.clShopifyTrack = function() {
             },
             "shipping" : {
                 "t": "number",
-                "v": event.data.checkout.shippingPrice.amount
+                "v": event.data.checkout.shippingPrice.amount || 0
             },
             "value":{
                 "t": "number",
