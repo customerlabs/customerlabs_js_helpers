@@ -340,7 +340,7 @@ window.clShopifyTrack = function() {
             },
             "shipping_price":{
                 "t": "number",
-                "v": event.data.checkout.shippingPrice.amount
+                "v": event.data.checkout.shippingLine.amount
             },
             "tax": {
                 "t": "string",
