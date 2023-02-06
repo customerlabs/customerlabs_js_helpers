@@ -1,0 +1,152 @@
+<!-- CustomerLabs Tag --><script>!function(t,e,r,c,a,n,s){t.ClAnalyticsObject=a,t[a]=t[a]||[],t[a].methods=["trackSubmit","trackClick","pageview","identify","track"],t[a].factory=function(e){return function(){var r=Array.prototype.slice.call(arguments);return r.unshift(e),t[a].push(r),t[a]}};for(var i=0;i<t[a].methods.length;i++){var o=t[a].methods[i];t[a][o]=t[a].factory(o)};n=e.createElement(r),s=e.getElementsByTagName(r)[0],n.async=1,n.crossOrigin="anonymous",n.src=c,s.parentNode.insertBefore(n,s)}(window,document,"script","//cdn.js.customerlabs.co/CUSTOMELABS_ACCOUNT_ID.js","_cl");_cl.SNIPPET_VERSION="1.0.0"</script><!-- End of CustomerLabs Tag -->
+<script id="cl_additional_post_purchase_script" type="text/javascript">
+    window.clShopifyTrack = function(){
+        if (!window.Shopify.wasPostPurchasePageSeen) {
+            
+            var order = window.Shopify.order;
+
+            var products = order.lineItems.map(function(item){
+                return {
+                    "product_id": Number(item.id).toString(),
+                    "product_name": item.title,
+                    "product_category": item.product.type,
+                    "product_price": item.price,
+                    "product_quantity": item.quantity,
+                    "product_variant": Number(item.variant.sku).toString()
+                }
+            });
+            var propertiesToSend = {
+                "customProperties": {
+                    "transaction_number": {
+                        "t": "string",
+                        "v": Number(order.id).toString(),
+                    },
+                    "value": {
+                        "t": "number",
+                        "v": order.totalPrice
+                    },
+                    "currency": {
+                        "t": "string",
+                        "v": order.currency
+                    }
+                },
+                "productProperties": products
+            }
+
+            var transaction_number = Number(order.id).toString()
+
+            if(transaction_number && window.localStorage){
+                var purchases_str = localStorage.getItem('cl_past_purchases') || "{}";
+                var purchases = JSON.parse(purchases_str);
+                if(!purchases[transaction_number]){
+                    _cl.trackClick('Purchased', propertiesToSend);
+                    purchases[transaction_number] = "true";
+                    window.localStorage.setItem("cl_past_purchases", JSON.stringify(purchases));
+                }
+            }else{
+                _cl.trackClick('Purchased', propertiesToSend);
+            }
+            var cltraits = order.customer;
+            if(cltraits["email"]){
+                var user_traits = {}
+                for(var trait in cltraits){
+                    if(cltraits[trait]){
+                        user_traits[trait] = {
+                            "t": "string",
+                            "v": cltraits[trait]
+                        }
+                    }
+                }
+                var props = {
+                    "customProperties": {
+                        "user_traits": {
+                            "t": "Object",
+                            "v": user_traits
+                        },
+                        "identify_by_email": {
+                            "t":"string",
+                            "v": cltraits["email"],
+                            "ib": true
+                        }
+                    }
+                }
+                _cl.identify(props)
+            }
+
+        }
+
+        Shopify.on('CheckoutAmended', function(newOrder, previousOrder) {
+            // identify which items were recently added, if any
+            var oldItems = previousOrder.lineItems.map(function (line) { 
+                return line.id; 
+            });
+
+            var addedItems = newOrder.lineItems.filter(function (line) { 
+                return oldItems.indexOf(line.id) < 0; 
+            });
+
+            // no new items were added, so we skip conversion tracking
+            if (addedItems.length === 0) {
+                return;
+            }
+
+            var order = newOrder;
+            var products = addedItems.map(function(item){
+                return {
+                    "product_id": Number(item.id).toString(),
+                    "product_name": item.title,
+                    "product_category": item.product.type,
+                    "product_price": item.price,
+                    "product_quantity": item.quantity,
+                    "product_variant": Number(item.variant.sku).toString()
+                };
+            });
+            var propertiesToSend = {
+                "customProperties": {
+                    "transaction_number": {
+                        "t": "string",
+                        "v": Number(order.id).toString(),
+                    },
+                    "value": {
+                        "t": "number",
+                        "v": order.totalPrice
+                    },
+                    "currency": {
+                        "t": "string",
+                        "v": order.currency
+                    }
+                },
+                "productProperties": products
+            }
+            _cl.trackClick("Purchased", propertiesToSend);
+            
+            var cltraits = order.customer;
+            if(cltraits["email"]){
+                var user_traits = {}
+                for(var trait in cltraits){
+                    if(cltraits[trait]){
+                        user_traits[trait] = {
+                            "t": "string",
+                            "v": cltraits[trait]
+                        }
+                    }
+                }
+                var props = {
+                    "customProperties": {
+                        "user_traits": {
+                            "t": "Object",
+                            "v": user_traits
+                        },
+                        "identify_by_email": {
+                            "t":"string",
+                            "v": cltraits["email"],
+                            "ib": true
+                        }
+                    }
+                }
+                _cl.identify(props)
+            }  
+        });
+
+    }
+</script>

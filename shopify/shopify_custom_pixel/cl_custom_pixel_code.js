@@ -340,7 +340,7 @@ window.clShopifyTrack = function() {
             },
             "shipping_price":{
                 "t": "number",
-                "v": event.data.checkout.shippingPrice.amount
+                "v": event.data.checkout.shippingLine.amount
             },
             "tax": {
                 "t": "string",
@@ -367,7 +367,7 @@ window.clShopifyTrack = function() {
         var products = shopify_products_mapping(event.data.checkout.lineItems);
         var productData = clabs_product_mappings(products);
         var customData = {
-            "transaction_id":{
+            "transaction_number":{
                 "t": "string",
                 "v": event.data.checkout.order.id
             },
@@ -385,7 +385,7 @@ window.clShopifyTrack = function() {
             },
             "shipping" : {
                 "t": "number",
-                "v": event.data.checkout.shippingPrice.amount
+                "v": event.data.checkout.shippingPrice.amount || 0
             },
             "value":{
                 "t": "number",
@@ -398,7 +398,18 @@ window.clShopifyTrack = function() {
         };
         var propertiesToSend = identify_properties_to_send(event);
         _cl.identify(propertiesToSend);
-        _cl.trackClick("Purchased",properties);
+        if(customData.transaction_number && customData.transaction_number.v && window.localStorage){
+            var purchases_str = localStorage.getItem('cl_past_purchases') || "{}";
+            var purchases = JSON.parse(purchases_str);
+            if(!purchases[customData.transaction_number.v]){
+                _cl.trackClick("Purchased",properties);
+                purchases[customData.transaction_number.v] = "true";
+                window.localStorage.setItem("cl_past_purchases", JSON.stringify(purchases));
+            }
+
+        }else{
+            _cl.trackClick("Purchased",properties);
+        }
         if (__CL__.debug) {
             console.log("Purchased"+" :"+JSON.stringify(properties));
         } 
