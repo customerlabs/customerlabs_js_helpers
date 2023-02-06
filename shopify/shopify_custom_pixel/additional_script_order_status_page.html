@@ -62,12 +62,12 @@
                     'productProperties': products
                 };
                 setTimeout(function(){
-                    if(transactionData.transaction_number && transactionData.transaction_id.v && window.localStorage){
+                    if(transactionData.transaction_number && transactionData.transaction_number.v && window.localStorage){
                         var purchases_str = localStorage.getItem('cl_past_purchases') || "{}";
                         var purchases = JSON.parse(purchases_str);
-                        if(!purchases[transactionData.transaction_id.v]){
+                        if(!purchases[transactionData.transaction_number.v]){
                             _cl.trackClick('Purchased', propertiesToSend);
-                            purchases[transactionData.transaction_id.v] = "true";
+                            purchases[transactionData.transaction_number.v] = "true";
                             window.localStorage.setItem("cl_past_purchases", JSON.stringify(purchases));
                         }
                     }else{
