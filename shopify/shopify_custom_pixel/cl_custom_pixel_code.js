@@ -366,6 +366,7 @@ window.clShopifyTrack = function() {
     analytics.subscribe("checkout_completed", event => {
         var products = shopify_products_mapping(event.data.checkout.lineItems);
         var productData = clabs_product_mappings(products);
+        var shippingDetails = event.data.checkout.shippingPrice || event.data.checkout.shippingLine
         var customData = {
             "transaction_number":{
                 "t": "string",
@@ -373,23 +374,23 @@ window.clShopifyTrack = function() {
             },
             "currency": {
                 "t": "string",
-                "v": event.data.checkout.totalPrice.currencyCode
+                "v": (event.data.checkout.totalPrice | {}).currencyCode
             },
             "subtotal": {
                 "t": "number",
-                "v": event.data.checkout.subtotalPrice.amount
+                "v": (event.data.checkout.subtotalPrice || {}).amount || 0
             },
             "tax" : {
                 "t": "number",
-                "v": event.data.checkout.totalTax.amount
+                "v": (event.data.checkout.totalTax || {}).amount || 0
             },
             "shipping" : {
                 "t": "number",
-                "v": event.data.checkout.shippingPrice.amount || 0
+                "v": shippingDetails && shippingDetails.amount || 0
             },
             "value":{
                 "t": "number",
-                "v": event.data.checkout.totalPrice.amount
+                "v": (event.data.checkout.totalPrice || {}).amount || 0
             }
         }
         var properties = {
