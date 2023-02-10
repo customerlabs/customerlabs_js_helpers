@@ -340,7 +340,7 @@ window.clShopifyTrack = function() {
             },
             "shipping_price":{
                 "t": "number",
-                "v": event.data.checkout.shippingLine.amount
+                "v": event.data.checkout.shippingLine.price.amount
             },
             "tax": {
                 "t": "string",
@@ -366,7 +366,7 @@ window.clShopifyTrack = function() {
     analytics.subscribe("checkout_completed", event => {
         var products = shopify_products_mapping(event.data.checkout.lineItems);
         var productData = clabs_product_mappings(products);
-        var shippingDetails = event.data.checkout.shippingPrice || event.data.checkout.shippingLine
+        var shippingDetails = event.data.checkout.shippingPrice || event.data.checkout.shippingLine.price
         var customData = {
             "transaction_number":{
                 "t": "string",
