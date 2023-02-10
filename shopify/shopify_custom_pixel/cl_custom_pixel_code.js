@@ -374,7 +374,7 @@ window.clShopifyTrack = function() {
             },
             "currency": {
                 "t": "string",
-                "v": (event.data.checkout.totalPrice | {}).currencyCode
+                "v": (event.data.checkout.totalPrice || {}).currencyCode
             },
             "subtotal": {
                 "t": "number",
