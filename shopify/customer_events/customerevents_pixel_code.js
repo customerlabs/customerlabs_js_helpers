@@ -255,9 +255,6 @@ window.clShopifyTrack = function() {
                 "customProperties"  : customData,
                 "productProperties" : productData
             };
-            if (__CL__[event.name]){
-
-            }
             _cl.trackClick("Product viewed", properties);
             if (__CL__.debug) {
                 console.log("Product viewed"+" : "+ JSON.stringify(properties));
