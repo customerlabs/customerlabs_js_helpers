@@ -223,6 +223,22 @@ function identify_properties_to_send(event){
 }
 
 /**
+ * @function extractOrderID
+ * @param orderId string
+ * This function is used to extract the order ID from the global id
+**/
+function extractOrderID(orderId) {
+    // Check if the identifier starts with "gid://shopify/OrderIdentity/"
+    if (orderId.startsWith('gid://shopify/OrderIdentity/')) {
+      const parts = orderId.split('/');
+      return parts[parts.length - 1];
+    }
+  
+    // If it's not in the GID format, assume it's a numeric order ID
+    return orderId;
+}
+
+/**
  * @function clShopifyTrack
  * This function triggers default shopify standard events
 **/
@@ -599,8 +615,7 @@ window.clShopifyTrack = function() {
             var products = shopify_products_mapping(event.data.checkout.lineItems, "variant");
             var productData = clabs_product_mappings(products);
             var shippingDetails = event.data.checkout.shippingLine.price || event.data.checkout.shippingPrice;
-            var parts = event.data.checkout.order.id.split('/');
-            var transaction_number = parts[parts.length - 1];
+            var transaction_number = extractOrderID(event.data.checkout.order.id);
             var customData = {
                 "transaction_number":{
                     "t": "string",
