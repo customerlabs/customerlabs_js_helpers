@@ -9,7 +9,9 @@
 **/
 var __CL__ = {
     debug: false, // if true, console messages will be display
+    shopify_debug: false, // if true, shopify event console messages will be display
     fb_skip_contents: false,
+    //The events will be trigger based on the boolean value 
     product_viewed: true, 
     collection_viewed: true, 
     product_added_to_cart: true, 
@@ -227,6 +229,9 @@ function identify_properties_to_send(event){
 window.clShopifyTrack = function() {
     //Product viewed event
     analytics.subscribe("product_viewed", event => {
+        if (__CL__.shopify_debug) {
+            console.log("product_viewed"+" : "+ event);
+        }
         if (event.name && __CL__[event.name]){
             var eventData = event.data.productVariant;
             var product = shopify_products_mapping([event.data], "productVariant");
@@ -263,6 +268,9 @@ window.clShopifyTrack = function() {
     });
     //Category viewed event
     analytics.subscribe("collection_viewed", event => {
+        if (__CL__.shopify_debug) {
+            console.log("collection_viewed"+" : "+ event);
+        }
         if (event.name && __CL__[event.name]){
             var properties = {
                 "customProperties": {
@@ -292,6 +300,9 @@ window.clShopifyTrack = function() {
     });
     //Added to cart event
     analytics.subscribe("product_added_to_cart", event => {
+        if (__CL__.shopify_debug) {
+            console.log("product_added_to_cart"+" : "+ event);
+        }
         if (event.name && __CL__[event.name]){
             var eventData = event.data.cartLine;
             var product = shopify_products_mapping([eventData], "merchandise");
@@ -329,6 +340,9 @@ window.clShopifyTrack = function() {
     });
     //Search made event
     analytics.subscribe("search_submitted", event => {
+        if (__CL__.shopify_debug) {
+            console.log("search_submitted"+" : "+ event);
+        }
         if (event.name && __CL__[event.name]){
             var properties = {
                 "customProperties" : {
@@ -350,6 +364,9 @@ window.clShopifyTrack = function() {
     });
     //Cart Viewed event
     analytics.subscribe("cart_viewed", event => {
+        if (__CL__.shopify_debug) {
+            console.log("cart_viewed"+" : "+ event);
+        }
         if (event.name && __CL__[event.name]){
             var products = shopify_products_mapping(event.data.cart.lines, "merchandise");
             var productData = clabs_product_mappings(products);
@@ -384,6 +401,9 @@ window.clShopifyTrack = function() {
     });
     //Checkout made event
     analytics.subscribe("checkout_started", event => {
+        if (__CL__.shopify_debug) {
+            console.log("checkout_started"+" : "+ event);
+        }
         if (event.name && __CL__[event.name]){
             var products = shopify_products_mapping(event.data.checkout.lineItems, "variant");
             var productData = clabs_product_mappings(products);
@@ -425,6 +445,9 @@ window.clShopifyTrack = function() {
     });
      //AddContactInfo event
     analytics.subscribe("checkout_contact_info_submitted", event => {
+        if (__CL__.shopify_debug) {
+            console.log("checkout_contact_info_submitted"+" : "+ event);
+        }
         if (event.name && __CL__[event.name]){
             var checkoutData = event.data.checkout;
             var properties = {
@@ -455,6 +478,9 @@ window.clShopifyTrack = function() {
     });
     //AddAddressInfo event
     analytics.subscribe("checkout_address_info_submitted", event => {
+        if (__CL__.shopify_debug) {
+            console.log("checkout_address_info_submitted"+" : "+ event);
+        }
         if (event.name && __CL__[event.name]){
             var checkoutData = event.data.checkout;
             var shippingDetails = checkoutData.shippingLine.price || checkoutData.shippingPrice;
@@ -490,6 +516,9 @@ window.clShopifyTrack = function() {
     });
     //AddShippingInfo event
     analytics.subscribe("checkout_shipping_info_submitted", event => {
+        if (__CL__.shopify_debug) {
+            console.log("checkout_shipping_info_submitted"+" : "+ event);
+        }
         if (event.name && __CL__[event.name]){
             var checkoutData = event.data.checkout;
             var shippingDetails = checkoutData.shippingLine.price || checkoutData.shippingPrice;
@@ -525,6 +554,9 @@ window.clShopifyTrack = function() {
     });
     //AddPaymentinfo event
     analytics.subscribe("payment_info_submitted", event => {
+        if (__CL__.shopify_debug) {
+            console.log("payment_info_submitted"+" : "+ event);
+        }
         if (event.name && __CL__[event.name]){
             var checkoutData = event.data.checkout;
             var shippingDetails = checkoutData.shippingLine.price || checkoutData.shippingPrice;
@@ -560,6 +592,9 @@ window.clShopifyTrack = function() {
     });
     //Purchased event
     analytics.subscribe("checkout_completed", event => {
+        if (__CL__.shopify_debug) {
+            console.log("checkout_completed"+" : "+ event);
+        }
         if (event.name && __CL__[event.name]){
             var products = shopify_products_mapping(event.data.checkout.lineItems, "variant");
             var productData = clabs_product_mappings(products);
