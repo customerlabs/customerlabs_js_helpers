@@ -601,8 +601,6 @@ window.clShopifyTrack = function() {
             var shippingDetails = event.data.checkout.shippingLine.price || event.data.checkout.shippingPrice;
             var parts = event.data.checkout.order.id.split('/');
             var transaction_number = parts[parts.length - 1];
-    
-            console.log(transaction_number); 
             var customData = {
                 "transaction_number":{
                     "t": "string",
@@ -650,7 +648,6 @@ window.clShopifyTrack = function() {
 
             }else{
                 _cl.trackClick("Purchased",properties);
-                console.log("Purchased :", properties);
                 console.log("Purchased"+" :"+JSON.stringify(properties));
             }
             if (__CL__.debug) {
