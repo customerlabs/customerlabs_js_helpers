@@ -230,7 +230,7 @@ window.clShopifyTrack = function() {
     //Product viewed event
     analytics.subscribe("product_viewed", event => {
         if (__CL__.shopify_debug) {
-            console.log("product_viewed"+" : "+ event);
+            console.log("product_viewed"+" : ", event);
         }
         if (event.name && __CL__[event.name]){
             var eventData = event.data.productVariant;
@@ -269,7 +269,7 @@ window.clShopifyTrack = function() {
     //Category viewed event
     analytics.subscribe("collection_viewed", event => {
         if (__CL__.shopify_debug) {
-            console.log("collection_viewed"+" : "+ event);
+            console.log("collection_viewed"+" : ", event);
         }
         if (event.name && __CL__[event.name]){
             var properties = {
@@ -301,7 +301,7 @@ window.clShopifyTrack = function() {
     //Added to cart event
     analytics.subscribe("product_added_to_cart", event => {
         if (__CL__.shopify_debug) {
-            console.log("product_added_to_cart"+" : "+ event);
+            console.log("product_added_to_cart"+" : ", event);
         }
         if (event.name && __CL__[event.name]){
             var eventData = event.data.cartLine;
@@ -341,7 +341,7 @@ window.clShopifyTrack = function() {
     //Search made event
     analytics.subscribe("search_submitted", event => {
         if (__CL__.shopify_debug) {
-            console.log("search_submitted"+" : "+ event);
+            console.log("search_submitted"+" : ", event);
         }
         if (event.name && __CL__[event.name]){
             var properties = {
@@ -365,7 +365,7 @@ window.clShopifyTrack = function() {
     //Cart Viewed event
     analytics.subscribe("cart_viewed", event => {
         if (__CL__.shopify_debug) {
-            console.log("cart_viewed"+" : "+ event);
+            console.log("cart_viewed"+" : ", event);
         }
         if (event.name && __CL__[event.name]){
             var products = shopify_products_mapping(event.data.cart.lines, "merchandise");
@@ -402,7 +402,7 @@ window.clShopifyTrack = function() {
     //Checkout made event
     analytics.subscribe("checkout_started", event => {
         if (__CL__.shopify_debug) {
-            console.log("checkout_started"+" : "+ event);
+            console.log("checkout_started"+" : ", event);
         }
         if (event.name && __CL__[event.name]){
             var products = shopify_products_mapping(event.data.checkout.lineItems, "variant");
@@ -446,7 +446,7 @@ window.clShopifyTrack = function() {
      //AddContactInfo event
     analytics.subscribe("checkout_contact_info_submitted", event => {
         if (__CL__.shopify_debug) {
-            console.log("checkout_contact_info_submitted"+" : "+ event);
+            console.log("checkout_contact_info_submitted"+" : ", event);
         }
         if (event.name && __CL__[event.name]){
             var checkoutData = event.data.checkout;
@@ -479,7 +479,7 @@ window.clShopifyTrack = function() {
     //AddAddressInfo event
     analytics.subscribe("checkout_address_info_submitted", event => {
         if (__CL__.shopify_debug) {
-            console.log("checkout_address_info_submitted"+" : "+ event);
+            console.log("checkout_address_info_submitted"+" : ", event);
         }
         if (event.name && __CL__[event.name]){
             var checkoutData = event.data.checkout;
@@ -517,7 +517,7 @@ window.clShopifyTrack = function() {
     //AddShippingInfo event
     analytics.subscribe("checkout_shipping_info_submitted", event => {
         if (__CL__.shopify_debug) {
-            console.log("checkout_shipping_info_submitted"+" : "+ event);
+            console.log("checkout_shipping_info_submitted"+" : ", event);
         }
         if (event.name && __CL__[event.name]){
             var checkoutData = event.data.checkout;
@@ -555,7 +555,7 @@ window.clShopifyTrack = function() {
     //AddPaymentinfo event
     analytics.subscribe("payment_info_submitted", event => {
         if (__CL__.shopify_debug) {
-            console.log("payment_info_submitted"+" : "+ event);
+            console.log("payment_info_submitted"+" : ", event);
         }
         if (event.name && __CL__[event.name]){
             var checkoutData = event.data.checkout;
@@ -593,7 +593,7 @@ window.clShopifyTrack = function() {
     //Purchased event
     analytics.subscribe("checkout_completed", event => {
         if (__CL__.shopify_debug) {
-            console.log("checkout_completed"+" : "+ event);
+            console.log("checkout_completed"+" : ", event);
         }
         if (event.name && __CL__[event.name]){
             var products = shopify_products_mapping(event.data.checkout.lineItems, "variant");
