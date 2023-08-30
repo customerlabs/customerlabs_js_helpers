@@ -11,6 +11,7 @@ var __CL__ = {
     debug: false, // if true, console messages will be display
     shopify_debug: false, // if true, shopify event console messages will be display
     fb_skip_contents: false,
+    default_currency: "USD", 
     //The events will be trigger based on the boolean value 
     product_viewed: true, 
     collection_viewed: true, 
@@ -22,7 +23,7 @@ var __CL__ = {
     checkout_contact_info_submitted: true, 
     checkout_shipping_info_submitted: true, 
     payment_info_submitted: true, 
-    checkout_completed: true
+    checkout_completed: true //If your account has access to the post purchase feature, then change the value of checkout_completed to false. If the post purchase feature is not available on your account, then change the value of checkout_completed to true.
 };
 
 /**
@@ -148,7 +149,7 @@ function identify_properties_formating(properties) {
                 clabs_properties.email = {"t": "string", "v": properties[key]}
                 break;
             case "phone":
-                clabs_properties.phone = {"t": "number", "v": properties[key]}
+                clabs_properties.phone = {"t": "string", "v": properties[key]}
                 break;
             case "city":
                 clabs_properties.city = {"t": "string", "v": properties[key]}
@@ -205,16 +206,37 @@ function identify_properties_to_send(event){
             }
         }
     }
-    if(user_traits_value.email){
+    if(user_traits_value.email && user_traits_value.phone){
         propertiesToSend.customProperties.identify_by_email = {
             "t":"string",
             "v": user_traits_value.email.v,
             "ib": true
         }
+        var regex = /^\+?\d+$/;
+        var isValidPhoneNumber = regex.test(user_traits_value.phone.v);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+        if (isValidPhoneNumber) {
+            propertiesToSend.customProperties.external_ids = {
+                "t": "Object",
+                "v": {
+                    "identify_by_phone": {
+                        "t": "string",
+                        "v": user_traits_value.phone.v
+                    }
+                }
+            };
+        }
+
+    }else if (user_traits_value.email){
+        propertiesToSend.customProperties.identify_by_email = {
+            "t":"string",
+            "v": user_traits_value.email.v,
+            "ib": true
+        }
+           
     }
-    if(user_traits_value.phone){
+    else if(user_traits_value.phone){
         propertiesToSend.customProperties.identify_by_phone = {
-            "t":"number",
+            "t":"string",
             "v": user_traits_value.phone.v,
             "ib": true
         }
@@ -254,7 +276,7 @@ window.clShopifyTrack = function() {
             var customData = {
                 "currency": {
                     "t": "string",
-                    "v": eventData.price.currencyCode
+                    "v": eventData.price.currencyCode || __CL__.default_currency
                 },
                 "url":{
                     "t": "string",
@@ -326,7 +348,7 @@ window.clShopifyTrack = function() {
             var customData = {
                 "currency": {
                     "t": "string",
-                    "v": eventData.cost.totalAmount.currencyCode
+                    "v": eventData.cost.totalAmount.currencyCode || __CL__.default_currency
                 },
                 "url": {
                     "t": "string",
@@ -384,14 +406,15 @@ window.clShopifyTrack = function() {
             console.log("cart_viewed"+" : ", event);
         }
         if (event.name && __CL__[event.name]){
-            var products = shopify_products_mapping(event.data.cart.lines, "merchandise");
+            var eventData = ((event.data.cart || {}).lines || []);
+            var products = shopify_products_mapping(eventData, "merchandise");
             var productData = clabs_product_mappings(products);
             var cartData = event.data.cart;
             var cartTotal =  ((cartData.cost || {}).totalAmount || {}) || {};
             var customData = {
                 "currency": {
                     "t": "string",
-                    "v": cartTotal.currencyCode || 0
+                    "v": cartTotal.currencyCode || __CL__.default_currency
                 },
                 "value":{
                     "t": "number",
@@ -421,13 +444,14 @@ window.clShopifyTrack = function() {
             console.log("checkout_started"+" : ", event);
         }
         if (event.name && __CL__[event.name]){
-            var products = shopify_products_mapping(event.data.checkout.lineItems, "variant");
+            var eventData = ((event.data.checkout || {}).lineItems || []);
+            var products = shopify_products_mapping(eventData, "variant");
             var productData = clabs_product_mappings(products);
             var checkoutData = event.data.checkout;
             var customData = {
                 "currency": {
                     "t": "string",
-                    "v": checkoutData.currencyCode
+                    "v": checkoutData.currencyCode || __CL__.default_currency
                 },
                 "value":{
                     "t": "number",
@@ -481,7 +505,7 @@ window.clShopifyTrack = function() {
                 },
                 "currency": {
                     "t": "string",
-                    "v": checkoutData.currencyCode
+                    "v": checkoutData.currencyCode || __CL__.default_currency
                 } 
             }
             var propertiesToSend = identify_properties_to_send(event);
@@ -519,7 +543,7 @@ window.clShopifyTrack = function() {
                 },
                 "currency": {
                     "t": "string",
-                    "v": checkoutData.currencyCode
+                    "v": checkoutData.currencyCode || __CL__.default_currency
                 } 
             }
             var propertiesToSend = identify_properties_to_send(event);
@@ -557,7 +581,7 @@ window.clShopifyTrack = function() {
                 },
                 "currency": {
                     "t": "string",
-                    "v": checkoutData.currencyCode
+                    "v": checkoutData.currencyCode || __CL__.default_currency
                 } 
             }
             var propertiesToSend = identify_properties_to_send(event);
@@ -595,7 +619,7 @@ window.clShopifyTrack = function() {
                 },
                 "currency": {
                     "t": "string",
-                    "v": checkoutData.currencyCode
+                    "v": checkoutData.currencyCode || __CL__.default_currency
                 } 
             }
             var propertiesToSend = identify_properties_to_send(event);
@@ -612,7 +636,8 @@ window.clShopifyTrack = function() {
             console.log("checkout_completed"+" : ", event);
         }
         if (event.name && __CL__[event.name]){
-            var products = shopify_products_mapping(event.data.checkout.lineItems, "variant");
+            var eventData = ((event.data.checkout || {}).lineItems || []);
+            var products = shopify_products_mapping(eventData, "variant");
             var productData = clabs_product_mappings(products);
             var shippingDetails = event.data.checkout.shippingLine.price || event.data.checkout.shippingPrice;
             var transaction_number = extractOrderID(event.data.checkout.order.id);
@@ -623,7 +648,7 @@ window.clShopifyTrack = function() {
                 },
                 "currency": {
                     "t": "string",
-                    "v": (event.data.checkout.totalPrice || {}).currencyCode
+                    "v": (event.data.checkout.totalPrice || {}).currencyCode || __CL__.default_currency
                 },
                 "subtotal": {
                     "t": "number",
