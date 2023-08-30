@@ -11,7 +11,7 @@ var __CL__ = {
     debug: false, // if true, console messages will be display
     shopify_debug: false, // if true, shopify event console messages will be display
     fb_skip_contents: false,
-    default_currency: "USD", 
+    default_currency: "USD", // If the currency code is not provided in the event, this default currency will be sent as an currency code attribute to customerlabs.
     //The events will be trigger based on the boolean value 
     product_viewed: true, 
     collection_viewed: true, 
