@@ -293,11 +293,11 @@ function extractOrderID(orderId) {
 }
 
 /**
- * @function PrintTrackObject
+ * @function PrintEventProperties
  * @param trackObj object
  * This function is used to print the events properties into the table view.
 **/
-var PrintTrackObject = function(trackObj, event) {
+var PrintEventProperties = function(trackObj, event) {
     function attributeTable(attribute, value) {
         return {
             Attribute: attribute,
@@ -310,7 +310,7 @@ var PrintTrackObject = function(trackObj, event) {
     var logger = console;
     logger.group("Event : ", event );
     logger.group("Event Attributes:");
-    logger.groupCollapsed("Common Properties");
+    logger.groupCollapsed("Custom Properties");
     if(Object.keys(customProperties).length > 0) {
         var commonPropertiesArray = [];
         for(var key in customProperties) {
@@ -318,7 +318,7 @@ var PrintTrackObject = function(trackObj, event) {
         }
         logger.table(commonPropertiesArray);
     } else {
-        logger.log("No Common Properties");
+        logger.log("No Custom Properties");
     }
     logger.groupEnd();
     logger.groupCollapsed("Product Properties");
@@ -327,8 +327,8 @@ var PrintTrackObject = function(trackObj, event) {
             var productAttributes = [];
             var productHeading = "Product " + (i + 1);
             logger.groupCollapsed(productHeading);
-            for(var key in productProperties[i]) {
-                productAttributes.push(new attributeTable(key, productProperties[i][key].v));
+            for(var productkey in productProperties[i]) {
+                productAttributes.push(new attributeTable(productkey, productProperties[i][productkey].v));
             }
             logger.table(productAttributes);
             logger.groupEnd();
@@ -381,7 +381,7 @@ window.clShopifyTrack = function() {
                 "productProperties" : productData
             };
             if (__CL__.debug) {
-                PrintTrackObject(properties, "Product viewed");
+                PrintEventProperties(properties, "Product viewed");
             }
             _cl.trackClick("Product viewed", properties);
         }
@@ -415,7 +415,7 @@ window.clShopifyTrack = function() {
                 }
             };
             if (__CL__.debug) {
-                PrintTrackObject(properties, "Category viewed");
+                PrintEventProperties(properties, "Category viewed");
             }
             _cl.pageview("Category viewed", properties);
         }
@@ -457,7 +457,7 @@ window.clShopifyTrack = function() {
                 "productProperties" : productData
             };
             if (__CL__.debug) {
-                PrintTrackObject(properties, "Added to cart");
+                PrintEventProperties(properties, "Added to cart");
             }
             _cl.trackClick("Added to cart",properties); 
             
@@ -484,7 +484,7 @@ window.clShopifyTrack = function() {
                 }
             }
             if (__CL__.debug) {
-                PrintTrackObject(properties, "Search made");
+                PrintEventProperties(properties, "Search made");
             }
             _cl.pageview("Search made",properties);
         }
@@ -524,7 +524,7 @@ window.clShopifyTrack = function() {
                 "productProperties" : productData
             };
             if (__CL__.debug) {
-                PrintTrackObject(properties, "Cart viewed");
+                PrintEventProperties(properties, "Cart viewed");
             }
             _cl.trackClick("Cart viewed", properties);
         }
@@ -571,7 +571,7 @@ window.clShopifyTrack = function() {
                 "productProperties" : productData
             };
             if (__CL__.debug) {
-                PrintTrackObject(properties, "Checkout made");
+                PrintEventProperties(properties, "Checkout made");
             }
             _cl.trackClick("Checkout made",properties);
         } 
@@ -606,7 +606,7 @@ window.clShopifyTrack = function() {
             var propertiesToSend = identify_properties_to_send(event);
             _cl.identify(propertiesToSend);
             if (__CL__.debug) {
-                PrintTrackObject(properties, "AddContactInfo");
+                PrintEventProperties(properties, "AddContactInfo");
             }
             _cl.trackClick("AddContactInfo",{"customProperties": properties});
         }
@@ -646,7 +646,7 @@ window.clShopifyTrack = function() {
             var propertiesToSend = identify_properties_to_send(event);
             _cl.identify(propertiesToSend);
             if (__CL__.debug) {
-                PrintTrackObject(properties, "AddAddressInfo");
+                PrintEventProperties(properties, "AddAddressInfo");
             }
             _cl.trackClick("AddAddressInfo",{"customProperties": properties});
         }
@@ -686,7 +686,7 @@ window.clShopifyTrack = function() {
             var propertiesToSend = identify_properties_to_send(event);
             _cl.identify(propertiesToSend);
             if (__CL__.debug) {
-                PrintTrackObject(properties, "AddShippingInfo");
+                PrintEventProperties(properties, "AddShippingInfo");
             }
             _cl.trackClick("AddShippingInfo",{"customProperties": properties});
         }
@@ -726,7 +726,7 @@ window.clShopifyTrack = function() {
             var propertiesToSend = identify_properties_to_send(event);
             _cl.identify(propertiesToSend);
             if (__CL__.debug) {
-                PrintTrackObject(properties, "AddPaymentInfo");
+                PrintEventProperties(properties, "AddPaymentInfo");
             }
             _cl.trackClick("AddPaymentInfo",{"customProperties": properties});
         }
@@ -779,7 +779,7 @@ window.clShopifyTrack = function() {
                 "productProperties" : productData
             };
             if (__CL__.debug) {
-                PrintTrackObject(properties, "Purchased");
+                PrintEventProperties(properties, "Purchased");
             }
             var propertiesToSend = identify_properties_to_send(event);
             _cl.identify(propertiesToSend);
