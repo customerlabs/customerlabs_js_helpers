@@ -392,7 +392,7 @@ var printCustomerEventProperties = function(eventdata) {
     var logger = console;
     var headingStyle = "color:#1ab394; font-size:16px; font-weight:bold;";
     var subheadingStyle = "color:#1ab394; font-size:15px; font-weight:bold;";
-    logger.log("%c✅ Event captured by Shopify Pixel", headingStyle);
+    logger.log("%c✅  Event received from Shopify Customer events Pixel", headingStyle);
     logger.groupCollapsed("%c Event: "+ eventdata.name , subheadingStyle);
     printEventData(eventdata.data);
     logger.groupEnd();
