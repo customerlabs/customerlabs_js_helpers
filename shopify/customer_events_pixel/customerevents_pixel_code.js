@@ -29,7 +29,7 @@
 **/
 
 var __CL__ = {
-    debug: false,
+    debug: true,
     fb_skip_contents: false,
     default_currency: "USD",
     product_viewed: true, 
@@ -55,7 +55,7 @@ var __CL__ = {
  * CustomerLabs Tracking code  
 * */
 
-!function(t,e,r,c,a,n,s){t.ClAnalyticsObject=a,t[a]=t[a]||[],t[a].methods=["trackSubmit","trackClick","pageview","identify","track"],t[a].factory=function(e){return function(){var r=Array.prototype.slice.call(arguments);return r.unshift(e),t[a].push(r),t[a]}};for(var i=0;i<t[a].methods.length;i++){var o=t[a].methods[i];t[a][o]=t[a].factory(o)}n=e.createElement(r),s=e.getElementsByTagName(r)[0],n.async=1,n.crossOrigin="anonymous",n.src=c,s.parentNode.insertBefore(n,s)}(window,document,"script","//cdn.js.customerlabs.co/CUSTOMELABS_ACCOUNT_ID.js","_cl");_cl.SNIPPET_VERSION="1.0.0";_cl.SANDBOX_ENV=true;
+!function(t,e,r,c,a,n,s){t.ClAnalyticsObject=a,t[a]=t[a]||[],t[a].methods=["trackSubmit","trackClick","pageview","identify","track"],t[a].factory=function(e){return function(){var r=Array.prototype.slice.call(arguments);return r.unshift(e),t[a].push(r),t[a]}};for(var i=0;i<t[a].methods.length;i++){var o=t[a].methods[i];t[a][o]=t[a].factory(o)}n=e.createElement(r),s=e.getElementsByTagName(r)[0],n.async=1,n.crossOrigin="anonymous",n.src=c,s.parentNode.insertBefore(n,s)}(window,document,"script","//cdn.js.customerlabs.co/CUSTOMERLABS_ACCOUNT_ID.js","_cl");_cl.SNIPPET_VERSION="1.0.0";_cl.SANDBOX_ENV=true;
 
 
 /**
@@ -293,18 +293,17 @@ function extractOrderID(orderId) {
 }
 
 /**
- * @function PrintEventProperties
+ * @function printEventProperties
  * @param trackObj object
- * This function is used to print the events properties into the table view.
+ * This function is used to print the events properties into the detailed view.
 **/
-var PrintEventProperties = function(trackObj, event) {
+var printEventProperties = function(trackObj, event) {
     function attributeTable(attribute, value) {
         return attribute + ": " + value;
     }
     
     var customProperties = trackObj.customProperties;
     var productProperties = trackObj.productProperties;
-
     var logger = console;
 
     // Style for the heading
@@ -322,7 +321,7 @@ var PrintEventProperties = function(trackObj, event) {
     
     // Display custom properties using logger
     logger.group("%cCustom Properties:", textStyle);
-    if (Object.keys(customProperties).length > 0) {
+    if ( customProperties && Object.keys(customProperties).length > 0) {
         for (var key in customProperties) {
             logger.log("%c" + attributeTable(key, customProperties[key].v), textStyle);
         }
@@ -333,7 +332,7 @@ var PrintEventProperties = function(trackObj, event) {
     
     // Display product properties using logger
     logger.group("%cProduct Properties:", textStyle);
-    if (productProperties.length > 0) {
+    if (productProperties && productProperties.length > 0) {
         for (var i = 0; i < productProperties.length; i++) {
             var productHeading = "Product " + (i + 1);
             logger.groupCollapsed("%c" + productHeading, textStyle);
@@ -350,6 +349,55 @@ var PrintEventProperties = function(trackObj, event) {
 
 };
 
+/**
+ * @function printEventData
+ * @param trackObj object
+ * This function is used to print the shopify customer event properties into the detail view.
+**/
+var printEventData = function(data, depth = 0) {
+    var logger = console;
+    var textStyle = "font-size:13px;";
+    for (const key in data) {
+      const value = data[key];
+      const indentation = ' '.repeat(depth * 4);
+      if (Array.isArray(value)) {
+        logger.log(`%c ${indentation}${key}: [`, textStyle);
+        for (const item of value) {
+          if (typeof item === 'object') {
+            logger.group(`%c ${indentation}  `, textStyle);
+            
+            printEventData(item, depth + 2);
+            logger.groupEnd();
+          } else {
+            logger.log(`%c  ${indentation}  - ${item}`, textStyle);
+          }
+        }
+        logger.log(`%c ${indentation}]`, textStyle);
+      } else if (typeof value === 'object') {
+        logger.group(`%c ${indentation}${key}:`, textStyle);
+        printEventData(value, depth + 1);
+        logger.groupEnd();
+      } else {
+        logger.log(`%c ${indentation}${key}: ${value}`, textStyle);
+      }
+    }
+}
+
+/**
+ * @function printCustomerEventProperties
+ * @param trackObj object
+ * This function is used to print the shopify customer event properties into the detail view.
+**/
+var printCustomerEventProperties = function(eventdata) {
+    var logger = console;
+    var headingStyle = "color:#1ab394; font-size:16px; font-weight:bold;";
+    var subheadingStyle = "color:#1ab394; font-size:15px; font-weight:bold;";
+    logger.log("%c✅ Event captured by Shopify Pixel", headingStyle);
+    logger.groupCollapsed("%c Event: "+ eventdata.name , subheadingStyle);
+    printEventData(eventdata.data);
+    logger.groupEnd();
+}
+
 
 /**
  * @function clShopifyTrack
@@ -359,9 +407,7 @@ window.clShopifyTrack = function() {
     //Product viewed event
     analytics.subscribe("product_viewed", event => {
         if (__CL__.debug) {
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-            console.log("product_viewed"+" : ", event);
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+            printCustomerEventProperties(event);
         }
         if (event.name && __CL__[event.name]){
             var eventData = event.data;
@@ -392,7 +438,7 @@ window.clShopifyTrack = function() {
                 "productProperties" : productData
             };
             if (__CL__.debug) {
-                PrintEventProperties(properties, "Product viewed");
+                printEventProperties(properties, "Product viewed");
             }
             _cl.trackClick("Product viewed", properties);
         }
@@ -400,9 +446,7 @@ window.clShopifyTrack = function() {
     //Category viewed event
     analytics.subscribe("collection_viewed", event => {
         if (__CL__.debug) {
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-            console.log("collection_viewed"+" : ", event);
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+            printCustomerEventProperties(event);
         }
         if (event.name && __CL__[event.name]){
             var properties = {
@@ -426,7 +470,7 @@ window.clShopifyTrack = function() {
                 }
             };
             if (__CL__.debug) {
-                PrintEventProperties(properties, "Category viewed");
+                printEventProperties(properties, "Category viewed");
             }
             _cl.pageview("Category viewed", properties);
         }
@@ -434,9 +478,7 @@ window.clShopifyTrack = function() {
     //Added to cart event
     analytics.subscribe("product_added_to_cart", event => {
         if (__CL__.debug) {
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-            console.log("product_added_to_cart"+" : ", event);
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+            printCustomerEventProperties(event);
         }
         if (event.name && __CL__[event.name]){
             var eventData = event.data.cartLine;
@@ -468,7 +510,7 @@ window.clShopifyTrack = function() {
                 "productProperties" : productData
             };
             if (__CL__.debug) {
-                PrintEventProperties(properties, "Added to cart");
+                printEventProperties(properties, "Added to cart");
             }
             _cl.trackClick("Added to cart",properties); 
             
@@ -477,9 +519,7 @@ window.clShopifyTrack = function() {
     //Search made event
     analytics.subscribe("search_submitted", event => {
         if (__CL__.debug) {
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-            console.log("search_submitted"+" : ", event);
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+            printCustomerEventProperties(event);
         }
         if (event.name && __CL__[event.name]){
             var properties = {
@@ -495,7 +535,7 @@ window.clShopifyTrack = function() {
                 }
             }
             if (__CL__.debug) {
-                PrintEventProperties(properties, "Search made");
+                printEventProperties(properties, "Search made");
             }
             _cl.pageview("Search made",properties);
         }
@@ -503,9 +543,7 @@ window.clShopifyTrack = function() {
     //Cart Viewed event
     analytics.subscribe("cart_viewed", event => {
         if (__CL__.debug) {
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-            console.log("cart_viewed"+" : ", event);
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+            printCustomerEventProperties(event);
         }
         if (event.name && __CL__[event.name]){
             var eventData = ((event.data.cart || {}).lines || []);
@@ -535,7 +573,7 @@ window.clShopifyTrack = function() {
                 "productProperties" : productData
             };
             if (__CL__.debug) {
-                PrintEventProperties(properties, "Cart viewed");
+                printEventProperties(properties, "Cart viewed");
             }
             _cl.trackClick("Cart viewed", properties);
         }
@@ -543,9 +581,7 @@ window.clShopifyTrack = function() {
     //Checkout made event
     analytics.subscribe("checkout_started", event => {
         if (__CL__.debug) {
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-            console.log("checkout_started"+" : ", event);
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+            printCustomerEventProperties(event);
         }
         if (event.name && __CL__[event.name]){
             var eventData = ((event.data.checkout || {}).lineItems || []);
@@ -582,7 +618,7 @@ window.clShopifyTrack = function() {
                 "productProperties" : productData
             };
             if (__CL__.debug) {
-                PrintEventProperties(properties, "Checkout made");
+                printEventProperties(properties, "Checkout made");
             }
             _cl.trackClick("Checkout made",properties);
         } 
@@ -590,9 +626,7 @@ window.clShopifyTrack = function() {
      //AddContactInfo event
     analytics.subscribe("checkout_contact_info_submitted", event => {
         if (__CL__.debug) {
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-            console.log("checkout_contact_info_submitted"+" : ", event);
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+            printCustomerEventProperties(event);
         }
         if (event.name && __CL__[event.name]){
             var checkoutData = event.data.checkout;
@@ -617,7 +651,7 @@ window.clShopifyTrack = function() {
             var propertiesToSend = identify_properties_to_send(event);
             _cl.identify(propertiesToSend);
             if (__CL__.debug) {
-                PrintEventProperties(properties, "AddContactInfo");
+                printEventProperties({"customProperties": properties}, "AddContactInfo");
             }
             _cl.trackClick("AddContactInfo",{"customProperties": properties});
         }
@@ -625,9 +659,7 @@ window.clShopifyTrack = function() {
     //AddAddressInfo event
     analytics.subscribe("checkout_address_info_submitted", event => {
         if (__CL__.debug) {
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-            console.log("checkout_address_info_submitted"+" : ", event);
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+            printCustomerEventProperties(event);
         }
         if (event.name && __CL__[event.name]){
             var checkoutData = event.data.checkout;
@@ -657,7 +689,7 @@ window.clShopifyTrack = function() {
             var propertiesToSend = identify_properties_to_send(event);
             _cl.identify(propertiesToSend);
             if (__CL__.debug) {
-                PrintEventProperties(properties, "AddAddressInfo");
+                printEventProperties({"customProperties": properties}, "AddAddressInfo");
             }
             _cl.trackClick("AddAddressInfo",{"customProperties": properties});
         }
@@ -665,9 +697,7 @@ window.clShopifyTrack = function() {
     //AddShippingInfo event
     analytics.subscribe("checkout_shipping_info_submitted", event => {
         if (__CL__.debug) {
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-            console.log("checkout_shipping_info_submitted"+" : ", event);
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+            printCustomerEventProperties(event);
         }
         if (event.name && __CL__[event.name]){
             var checkoutData = event.data.checkout;
@@ -697,7 +727,7 @@ window.clShopifyTrack = function() {
             var propertiesToSend = identify_properties_to_send(event);
             _cl.identify(propertiesToSend);
             if (__CL__.debug) {
-                PrintEventProperties(properties, "AddShippingInfo");
+                printEventProperties({"customProperties": properties}, "AddShippingInfo");
             }
             _cl.trackClick("AddShippingInfo",{"customProperties": properties});
         }
@@ -705,9 +735,7 @@ window.clShopifyTrack = function() {
     //AddPaymentinfo event
     analytics.subscribe("payment_info_submitted", event => {
         if (__CL__.debug) {
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-            console.log("payment_info_submitted"+" : ", event);
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+            printCustomerEventProperties(event);
         }
         if (event.name && __CL__[event.name]){
             var checkoutData = event.data.checkout;
@@ -737,7 +765,7 @@ window.clShopifyTrack = function() {
             var propertiesToSend = identify_properties_to_send(event);
             _cl.identify(propertiesToSend);
             if (__CL__.debug) {
-                PrintEventProperties(properties, "AddPaymentInfo");
+                printEventProperties({"customProperties": properties}, "AddPaymentInfo");
             }
             _cl.trackClick("AddPaymentInfo",{"customProperties": properties});
         }
@@ -745,9 +773,7 @@ window.clShopifyTrack = function() {
     //Purchased event
     analytics.subscribe("checkout_completed", event => {
         if (__CL__.debug) {
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
-            console.log("checkout_completed"+" : ", event);
-            console.log("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+            printCustomerEventProperties(event);
         }
         if (event.name && __CL__[event.name]){
             var eventData = ((event.data.checkout || {}).lineItems || []);
@@ -790,7 +816,7 @@ window.clShopifyTrack = function() {
                 "productProperties" : productData
             };
             if (__CL__.debug) {
-                PrintEventProperties(properties, "Purchased");
+                printEventProperties(properties, "Purchased");
             }
             var propertiesToSend = identify_properties_to_send(event);
             _cl.identify(propertiesToSend);
