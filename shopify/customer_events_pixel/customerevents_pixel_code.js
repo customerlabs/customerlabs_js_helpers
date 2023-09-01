@@ -11,20 +11,20 @@
 * Feel free to adjust these settings to match your specific use case.
 *
 * Settings:
-* - debug: Display event properties in console messages for debugging the incoming and outgoing data (true to show, false to hide).
-* - fb_skip_contents: Enable skipping of Facebook contents (true to enable, false to disable).
-* - default_currency: Send "USD" as the currency if the event does not provide a currency code.
-* - product_viewed: Trigger a product viewed event when a specific product is viewed (true to trigger, false to suppress).
-* - collection_viewed: Trigger a collection viewed event when a collection is viewed (true to trigger, false to suppress).
-* - product_added_to_cart: Trigger a product added to cart event when a product is added to the cart (true to trigger, false to suppress).
-* - search_submitted: Trigger a submitted search event when a search is submitted (true to trigger, false to suppress).
-* - cart_viewed: Trigger a cart viewed event when the cart is viewed (true to trigger, false to suppress).
-* - checkout_started: Trigger a checkout started event when the checkout process begins (true to trigger, false to suppress).
-* - checkout_address_info_submitted: Trigger a submitted checkout address info event when address information is submitted (true to trigger, false to suppress).
-* - checkout_contact_info_submitted: Trigger a submitted checkout contact info event when contact information is submitted (true to trigger, false to suppress).
-* - checkout_shipping_info_submitted: Trigger a submitted checkout shipping info event when shipping information is submitted (true to trigger, false to suppress).
-* - payment_info_submitted: Trigger a submitted payment info event when payment information is submitted (true to trigger, false to suppress).
-* - checkout_completed: Set to 'false' if the post-purchase feature is available; otherwise, set to 'true'.
+    - debug: Display event properties in console messages for debugging the incoming and outgoing data (true to show, false to hide).
+    - fb_skip_contents: Enable skipping of Facebook contents (true to enable, false to disable).
+    - default_currency: Send "USD" as the currency if the event does not provide a currency code.
+    - product_viewed: Trigger a product viewed event when a specific product is viewed (true to trigger, false to suppress).
+    - collection_viewed: Trigger a collection viewed event when a collection is viewed (true to trigger, false to suppress).
+    - product_added_to_cart: Trigger a product added to cart event when a product is added to the cart (true to trigger, false to suppress).
+    - search_submitted: Trigger a submitted search event when a search is submitted (true to trigger, false to suppress).
+    - cart_viewed: Trigger a cart viewed event when the cart is viewed (true to trigger, false to suppress).
+    - checkout_started: Trigger a checkout started event when the checkout process begins (true to trigger, false to suppress).
+    - checkout_address_info_submitted: Trigger a submitted checkout address info event when address information is submitted (true to trigger, false to suppress).
+    - checkout_contact_info_submitted: Trigger a submitted checkout contact info event when contact information is submitted (true to trigger, false to suppress).
+    - checkout_shipping_info_submitted: Trigger a submitted checkout shipping info event when shipping information is submitted (true to trigger, false to suppress).
+    - payment_info_submitted: Trigger a submitted payment info event when payment information is submitted (true to trigger, false to suppress).
+    - checkout_completed: Set to 'false' if the post-purchase feature is available; otherwise, set to 'true'.
 *
 **/
 
@@ -299,44 +299,55 @@ function extractOrderID(orderId) {
 **/
 var PrintEventProperties = function(trackObj, event) {
     function attributeTable(attribute, value) {
-        return {
-            Attribute: attribute,
-            Value: value
-        };
+        return attribute + ": " + value;
     }
+    
     var customProperties = trackObj.customProperties;
     var productProperties = trackObj.productProperties;
 
     var logger = console;
-    logger.group("Event : ", event );
-    logger.group("Event Attributes:");
-    logger.groupCollapsed("Custom Properties");
-    if(Object.keys(customProperties).length > 0) {
-        var commonPropertiesArray = [];
-        for(var key in customProperties) {
-            commonPropertiesArray.push(new attributeTable(key, customProperties[key].v));
+
+    // Style for the heading
+    var headingStyle = "color:#1ab394; font-size:16px; font-weight:bold;";
+    var subheadingStyle = "color:#1ab394; font-size:15px; font-weight:bold;";
+
+
+    // Style for the text
+    var textStyle = "font-size:13px;";
+    // Log the event sent message with the specified style
+    logger.log("%c✅ Event sent to Customerlabs", headingStyle);
+
+    // Log the event heading with the specified style
+    logger.groupCollapsed("%cEvent : " + event, subheadingStyle );
+    
+    // Display custom properties using logger
+    logger.group("%cCustom Properties:", textStyle);
+    if (Object.keys(customProperties).length > 0) {
+        for (var key in customProperties) {
+            logger.log("%c" + attributeTable(key, customProperties[key].v), textStyle);
         }
-        logger.table(commonPropertiesArray);
     } else {
-        logger.log("No Custom Properties");
+        logger.log("%cNo Custom Properties", textStyle);
     }
     logger.groupEnd();
-    logger.groupCollapsed("Product Properties");
-    if(productProperties.length > 0) {
-        for(var i = 0; i < productProperties.length; i++) {
-            var productAttributes = [];
+    
+    // Display product properties using logger
+    logger.group("%cProduct Properties:", textStyle);
+    if (productProperties.length > 0) {
+        for (var i = 0; i < productProperties.length; i++) {
             var productHeading = "Product " + (i + 1);
-            logger.groupCollapsed(productHeading);
-            for(var productkey in productProperties[i]) {
-                productAttributes.push(new attributeTable(productkey, productProperties[i][productkey].v));
+            logger.groupCollapsed("%c" + productHeading, textStyle);
+            for (var prodkey in productProperties[i]) {
+                logger.log("%c" + attributeTable(prodkey, productProperties[i][prodkey].v), textStyle);
             }
-            logger.table(productAttributes);
             logger.groupEnd();
         }
     } else {
-        logger.log("No Product Attributes");
+        logger.log("%cNo Product Attributes", textStyle);
     }
+    
     logger.groupEnd();
+
 };
 
 
