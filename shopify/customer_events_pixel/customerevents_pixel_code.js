@@ -344,7 +344,7 @@ var printEventProperties = function(trackObj, event) {
     } else {
         logger.log("%cNo Product Attributes", textStyle);
     }
-    
+    logger.groupEnd();
     logger.groupEnd();
 
 };
