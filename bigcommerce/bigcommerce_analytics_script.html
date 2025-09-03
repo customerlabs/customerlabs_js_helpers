@@ -85,6 +85,25 @@ var composeCustomProperties = function(eventName, eventData) {
     }
     return {};
 };
+
+var triggerIdentify = function(proPerties) {
+  if(proPerties){
+    _cl.identify(proPerties);
+  }
+}
+
+
+async function getData(url) {
+            const response = await fetch(url, {
+                method: 'GET',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            return response.json();
+        }
+
 function subscribeOnBodlEvents() {
 
   if (
@@ -242,23 +261,7 @@ function subscribeOnBodlEvents() {
       }
     });
   }
-    
-  //   If window.bodlEvents.checkout.checkoutBegin is available, then...
-  if (typeof window.bodlEvents.checkout.checkoutBegin === 'function') {
-    // run the checkoutBegin function to get the payload
-    window.bodlEvents.checkout.checkoutBegin((payload) => {
-      try {
-        if (typeof _cl !== 'undefined') {
-          var cust_prop = composeCustomProperties('checkout_started', payload);
-          var products = bigcommerce_products_mapping(payload, 'line_items');
-          _cl.trackClick('Checkout made', { customProperties: cust_prop, productProperties: products });
-        }
-      } catch (e) {
-        console.warn('CL checkoutBegin error', e);
-      }
-    });    
-  }
- 
+
   // If window.bodlEvents.checkout.shippingDetailsProvided is available, then...
   if (typeof window.bodlEvents.checkout.shippingDetailsProvided === 'function') {
     // run the shippingDetailsProvided function to get the payload
@@ -293,43 +296,138 @@ function subscribeOnBodlEvents() {
   }
  
   // If window.bodlEvents.checkout.orderPurchased is available, then...
-  if (typeof window.bodlEvents.checkout.orderPurchased === 'function') {
-    // run the orderPurchase function to get the payload
-    window.bodlEvents.checkout.orderPurchased((payload) => {
-      try {
-        if (typeof _cl !== 'undefined') {
-          var cust_prop = composeCustomProperties('checkout_completed', payload);
-          var products = bigcommerce_products_mapping(payload, 'line_items');
-          _cl.trackClick('Purchased', { customProperties: cust_prop, productProperties: products });
-          const customerId = window.bodl.shopper.customer_id || '';
-          if(customerId){
-          var userAttributes = {
-            "bc_customer_id": {
-                "t": "string",
-                "v": customerId
-            }
-          };
-          var props = {
-                        "customProperties": {
-                            "user_traits": {
-                                "t": "Object",
-                                "v": userAttributes
-                            },
-                            "identify_by_bccustomerid": {
-                                "t":"string",
-                                "v": customerId,
-                                "ib": true
-                            }
-                        }
+  if (typeof window.bodlEvents.checkout.checkoutBegin === 'function') {
+          window.bodlEvents.checkout.checkoutBegin(async (payload) => {
+              const checkoutId = '{{checkout.id}}';
+              let products = [];
+              let userInfo = {};
+  
+              try {
+                  const data = await getData(`/api/storefront/checkouts/${checkoutId}`);
+                  var email = data.billingAddress?.email;
+                  var customer_id = window.bodl.shopper.customer_id;
+                  let proPerties = {
+                    "customProperties":{
+                       "user_traits":{
+                      "bc_customer_id": {
+                        "t": "string",
+                        "v": customer_id,
+                      },
+                      "email":{
+                        "t": "string",
+                        "v": email,
+                      },
+                    },
+                    "identify_by_email":{
+                      "t":"string",
+                      "v": email,
+                      "ib": true
                     }
-                    _cl.identify(props)
-          }
-        }
-      } catch (e) {
-        console.warn('CL orderPurchased error', e);
+                  }
+                  } 
+                  if (typeof _cl !== 'undefined') {
+                      var cust_prop = composeCustomProperties('checkout_started', payload);
+                      var mappedProducts = bigcommerce_products_mapping(payload, 'line_items');
+                      _cl.trackClick('Checkout made', { customProperties: cust_prop, productProperties: mappedProducts });
+                  }
+                  if(email || customer_id){
+                    triggerIdentify(proPerties);
+                  }
+              } catch (e) {
+                  console.log('CL checkoutBegin error', e);
+              }
+          });
       }
-    });
-  }
+  
+      // ✅ orderPurchased (fixed async/await issue)
+      if (typeof window.bodlEvents.checkout.orderPurchased === 'function') {
+          window.bodlEvents.checkout.orderPurchased(async (payload) => {
+              let products = [];
+  
+              try {
+                  const data = await getData(`/api/storefront/order/${payload.order_id}`);
+                   let customer_id = window.bodl.shopper.customer_id;
+                   let billingInfo = data.billingAddress;
+                    let customProperties = {
+                      "user_traits":{
+                        "bc_customer_id": {
+                          "t": "string",
+                          "v": customer_id
+                        },
+                        "email":{
+                          "t": "string",
+                          "v": billingInfo.email
+                        },
+                        "first_name":{
+                          "t": "string",
+                          "v": billingInfo.firstName
+                        },
+                        "last_name":{
+                          "t": "string",
+                          "v": billingInfo.lastName
+                        },
+                        "company":{
+                          "t": "string",
+                          "v": billingInfo.company
+                        },
+                        "address1":{
+                          "t": "string",
+                          "v": billingInfo.address1
+                        },
+                        "address2":{
+                          "t": "string",
+                          "v": billingInfo.address2
+                        },
+                        "city":{
+                          "t": "string",
+                          "v": billingInfo.city
+                        },
+                        "phone":{
+                          "t": "string",
+                          "v": billingInfo.phone
+                        }
+                      }
+                    }
+                  if (billingInfo.email && billingInfo.email !== null && billingInfo.email !== "") {
+                        customProperties["identify_by_email"] = {
+                            "t": "string",
+                            "v": billingInfo.email,
+                            "ib": true
+                        };
+                        if (billingInfo.phone && billingInfo.phone !== null && billingInfo.phone !== "") {
+                            customProperties["external_ids"] = {
+                                "t": "Object",
+                                "v": {
+                                    "identify_by_phone": {
+                                        "t": "string",
+                                        "v": billingInfo.phone
+                                    }
+                                }
+                            };
+                        }
+                    } else if (billingInfo.phone && billingInfo.phone !== null && billingInfo.phone !== "") {
+                        customProperties["identify_by_phone"] = {
+                            "t": "string",
+                            "v": billingInfo.phone,
+                            "ib": true
+                        };
+                    }
+
+
+  
+                  if (typeof _cl !== 'undefined') {
+                      var cust_prop = composeCustomProperties('checkout_completed', payload);
+                      var mappedProducts = bigcommerce_products_mapping(payload, 'line_items');
+                      _cl.trackClick('Purchased', { customProperties: cust_prop, productProperties: mappedProducts });
+                  }
+                  if(billingInfo.email || billingInfo.phone || customer_id){
+                    triggerIdentify({"customProperties": customProperties});
+                  }
+              } catch (e) {
+                  console.warn('CL orderPurchased error', e);
+              }
+          });
+      }
 }
  
 // when the page window loads, run the subscribeOnBodlEvents function
