@@ -142,7 +142,6 @@ function subscribeOnBodlEvents() {
  
   // If window.bodlEvents.consent.loaded is available, then...
   if (typeof window.bodlEvents.consent.loaded === 'function') {
-    // run the loaded function to get the payload
     window.bodlEvents.consent.loaded((payload) => {
       let userConsentTrack = false;
       const consentCookie = getCookie(`${window.CLabsgbVar.appId}_userConsent`);
@@ -167,7 +166,6 @@ function subscribeOnBodlEvents() {
  
   // If window.bodlEvents.consent.updated is available, then...
   if (typeof window.bodlEvents.consent.updated === 'function') {
-    // run the updated function to get the payload
     window.bodlEvents.consent.updated((payload) => {
       const userConsent = {
         ad_storage: payload.advertising,
@@ -182,7 +180,6 @@ function subscribeOnBodlEvents() {
  
   // If window.bodlEvents.product.searchPerformed is available, then...
   if (typeof window.bodlEvents.product.searchPerformed === 'function') {
-    // run the searchPerformed function to get the payload
     window.bodlEvents.product.searchPerformed((payload) => {
       try {
         if (typeof _cl !== 'undefined') {
@@ -195,22 +192,8 @@ function subscribeOnBodlEvents() {
     });
   }    
  
-  // If window.bodlEvents.banner.viewed is available, then...
-  if (typeof window.bodlEvents.banner.viewed === 'function') {
-    // run the viewed function to get the payload
-    window.bodlEvents.banner.viewed((payload) => {
-      // log the event payload
-      console.log(
-        'window.bodlEvents.banner.viewed ~ payload',
-        payload
-      );
-      // no direct mapping in default helper; skip
-    });
-  }    
- 
   // If window.bodlEvents.product.pageViewed is available, then...
   if (typeof window.bodlEvents.product.pageViewed === 'function') {
-    // run the pageViewed function to get the payload
     window.bodlEvents.product.pageViewed((payload) => {
       try {
           var products = bigcommerce_products_mapping(payload, 'line_items');
@@ -224,7 +207,6 @@ function subscribeOnBodlEvents() {
     
   // If window.bodlEvents.product.categoryViewed is available, then...
   if (typeof window.bodlEvents.product.categoryViewed === 'function') {
-    // run the categoryViewed function to get the payload
     window.bodlEvents.product.categoryViewed((payload) => {
       try {
         if (typeof _cl !== 'undefined') {
@@ -239,7 +221,6 @@ function subscribeOnBodlEvents() {
     
   // If window.bodlEvents.cart.addItem is available, then...
   if (typeof window.bodlEvents.cart.addItem === 'function') {
-    // run the addItem function to get the payload
     window.bodlEvents.cart.addItem((payload) => {
       try {
         if (typeof _cl !== 'undefined') {
@@ -255,7 +236,6 @@ function subscribeOnBodlEvents() {
     
   // If window.bodlEvents.cart.viewed is available, then...
   if (typeof window.bodlEvents.cart.viewed === 'function') {
-    // run the viewed function to get the payload
     window.bodlEvents.cart.viewed((payload) => {
       try {
         if (typeof _cl !== 'undefined') {
@@ -271,7 +251,6 @@ function subscribeOnBodlEvents() {
     
   // If window.bodlEvents.cart.removeItem is available, then...
   if (typeof window.bodlEvents.cart.removeItem === 'function') {
-    // run the removeItem function to get the payload
     window.bodlEvents.cart.removeItem((payload) => {
       try {
         if (typeof _cl !== 'undefined') {
@@ -287,34 +266,19 @@ function subscribeOnBodlEvents() {
 
   // If window.bodlEvents.checkout.shippingDetailsProvided is available, then...
   if (typeof window.bodlEvents.checkout.shippingDetailsProvided === 'function') {
-    // run the shippingDetailsProvided function to get the payload
     window.bodlEvents.checkout.shippingDetailsProvided((payload) => {
-      // log the event payload
       var cust_prop = composeCustomProperties('checkout_shipping_info_submitted', payload);
       var products = bigcommerce_products_mapping(payload, 'line_items');
       _cl.trackClick('AddShippingInfo', { customProperties: cust_prop, productProperties: products });
-      console.log(
-        'window.bodlEvents.checkout.shippingDetailsProvided ~ payload',
-        payload
-      );
-      // no separate CL event in default helper; skip
     });
   }
  
   // If window.bodlEvents.checkout.paymentDetailsProvided is available, then...
   if (typeof window.bodlEvents.checkout.paymentDetailsProvided === 'function') {
-    // run the paymentDetailsProvided function to get the payload
     window.bodlEvents.checkout.paymentDetailsProvided((payload) => {
       var cust_prop = composeCustomProperties('payment_info_submitted', payload);
       var products = bigcommerce_products_mapping(payload, 'line_items');
       _cl.trackClick('AddPaymentInfo', { customProperties: cust_prop, productProperties: products });
-      // log the event payload
-      console.log(
-        'window.bodlEvents.checkout.paymentDetailsProvided ~ payload',
-        payload
-      );
-
-      // no separate CL event in default helper; skip
     });
   }
  
