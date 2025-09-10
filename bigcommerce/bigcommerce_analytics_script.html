@@ -1,0 +1,423 @@
+<script>
+ 
+ var bigcommerce_products_mapping = function(eventData, itemGroup) {
+    var products = [];
+    var items = eventData[itemGroup];
+    if(items && itemGroup && items.length > 0){//items  
+        for(var i=0;i< items.length;i++){
+            var productData = items[i];
+            var product = {
+                "product_id"              : productData.product_id, 
+                "product_sku"             : productData.sku,
+                "product_name"            : productData.product_name,
+                "product_price"           : productData.purchase_price,
+                "product_brand"           : productData.brand_name,
+                "product_type"            : productData.product_type,
+                "product_quantity"        : productData.quantity,
+                "product_variant"      : productData.variant_id,
+            };
+            // Compute discount based on base_price (original) and purchase_price (discounted)
+            var basePrice = Number(productData.base_price);
+            var purchasePrice = Number(productData.purchase_price);
+            if(!isNaN(basePrice) && !isNaN(purchasePrice) && basePrice > 0){
+                var discountAmount = Math.max(0, basePrice - purchasePrice);
+                if(discountAmount > 0){
+                    product["product_discount_price"] = discountAmount;
+                    product["product_discount_percentage"] = Math.round((discountAmount / basePrice) * 100);
+                    product["product_discount_applied"] = true;
+                }
+            }
+            products.push(product);
+        }
+    }
+    return products;
+}
+
+var composeCustomProperties = function(eventName, eventData) {
+    var customData = {
+        "content_type":  "product_group"
+    };
+    if(eventName && eventData){
+        switch (eventName) {
+            case "product_viewed":
+                customData.currency = eventData.currency|| "INR";
+                customData.value = eventData.product_value|| 1;
+                break;
+            case "collection_viewed":
+                customData.category_name = eventData.category_name || "";
+                customData.category_id = eventData.category_id || "";
+                break;
+            case "product_added_to_cart":
+            case "product_removed_from_cart":
+                customData.currency = eventData.currency || "INR";
+                customData.value = eventData.product_value || 1;
+                break;
+            case "search_submitted":
+                customData.search_string = eventData.search_keyword || "";
+                break;
+            case "cart_viewed":
+                customData.currency = eventData.currency || "INR";
+                customData.value = eventData.cart_value || 1;
+                break;
+            case "checkout_started":
+            case "checkout_address_info_submitted":
+            case "checkout_contact_info_submitted":
+            case "checkout_shipping_info_submitted":
+            case "payment_info_submitted":
+                customData.currency = eventData.currency || "INR";
+                customData.value = eventData.cart_value || 1;
+                break;
+            case "checkout_completed":
+                var transaction_number = eventData.order_id;
+                customData.transaction_number = transaction_number;
+                customData.currency = eventData.currency || "INR";
+                customData.subtotal = eventData.subtotal || 0;
+                customData.tax = eventData.tax || 0;
+                customData.value = eventData.cart_value || 1;
+                customData.shipping = eventData.shipping_price || 0;
+                customData.customer_id = eventData.customer_id || "";
+                break;
+            default:
+                console.log("Unrecognized Event captured by Bigcommerce Pixel");
+                break;
+        }
+        return customData;
+    }
+    return {};
+};
+
+var triggerIdentify = function(proPerties) {
+  if(proPerties){
+    _cl.identify(proPerties);
+  }
+}
+
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2){
+        return parts.pop().split(";").shift();
+    }
+    return null;
+}
+
+async function getData(url) {
+            const response = await fetch(url, {
+                method: 'GET',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            return response.json();
+        }
+
+function subscribeOnBodlEvents() {
+
+  if (
+    // window is falsy
+    !window ||
+    // window.bodlEvents is not defined
+    typeof window.bodlEvents === 'undefined' ||
+    // window.bodlEvents.banner is not defined
+    typeof window.bodlEvents.banner === 'undefined' ||
+    // window.bodlEvents.checkout is not defined
+    typeof window.bodlEvents.checkout === 'undefined' ||
+    // window.bodlEvents.cart is not defined
+    typeof window.bodlEvents.cart === 'undefined' ||
+    // window.bodlEvents.product is not defined
+    typeof window.bodlEvents.product === 'undefined' ||
+    // window.bodlEvents.consent is not defined
+    typeof window.bodlEvents.consent === 'undefined'  
+  ) {
+    // log 'not defined' to the console
+    console.log('not defined');
+    // and end script execution
+    return;
+  }
+ 
+  // if window.dataLayer doesn't exist, make it an empty array
+  window.dataLayer = window.dataLayer || [];
+ 
+  // If window.bodlEvents.consent.loaded is available, then...
+  if (typeof window.bodlEvents.consent.loaded === 'function') {
+    window.bodlEvents.consent.loaded((payload) => {
+      let userConsentTrack = false;
+      const consentCookie = getCookie(`${window.CLabsgbVar.appId}_userConsent`);
+      if(consentCookie && consentCookie !== null && consentCookie !== ""){
+        const userConsent = JSON.parse(consentCookie);
+        if(userConsent.consentUpdated){
+          userConsentTrack = true;
+        }
+      }
+      if(!userConsentTrack){
+       const userConsent = {
+        ad_storage: payload.advertising,
+        analytics_storage: payload.analytics,
+        functional_storage: payload.functional,
+        ad_personalization: payload.advertising,
+        ad_user_data: payload.advertising,
+       }
+       _cl.trackConsent(userConsent);
+      }
+    });
+  }
+ 
+  // If window.bodlEvents.consent.updated is available, then...
+  if (typeof window.bodlEvents.consent.updated === 'function') {
+    window.bodlEvents.consent.updated((payload) => {
+      const userConsent = {
+        ad_storage: payload.advertising,
+        analytics_storage: payload.analytics,
+        functional_storage: payload.functional,
+        ad_personalization: payload.advertising,
+        ad_user_data: payload.advertising,
+       }
+       _cl.trackConsent(userConsent);
+    });
+  } 
+ 
+  // If window.bodlEvents.product.searchPerformed is available, then...
+  if (typeof window.bodlEvents.product.searchPerformed === 'function') {
+    window.bodlEvents.product.searchPerformed((payload) => {
+      try {
+        if (typeof _cl !== 'undefined') {
+          var customProperties = composeCustomProperties('search_submitted', payload);
+          _cl.pageview('Search made', { customProperties: customProperties });
+        }
+      } catch (e) {
+        console.warn('CL searchPerformed error', e);
+      }
+    });
+  }    
+ 
+  // If window.bodlEvents.product.pageViewed is available, then...
+  if (typeof window.bodlEvents.product.pageViewed === 'function') {
+    window.bodlEvents.product.pageViewed((payload) => {
+      try {
+          var products = bigcommerce_products_mapping(payload, 'line_items');
+          var customProperties = composeCustomProperties('product_viewed', payload);
+          _cl.trackClick('Product viewed', { customProperties: customProperties, productProperties: products });
+      } catch (e) {
+        console.warn('CL pageViewed error', e);
+      }
+    });
+  }
+    
+  // If window.bodlEvents.product.categoryViewed is available, then...
+  if (typeof window.bodlEvents.product.categoryViewed === 'function') {
+    window.bodlEvents.product.categoryViewed((payload) => {
+      try {
+        if (typeof _cl !== 'undefined') {
+          var customProperties = composeCustomProperties('category_viewed', payload);
+          _cl.trackClick('Category viewed', { customProperties: customProperties });
+        }
+      } catch (e) {
+        console.warn('CL categoryViewed error', e);
+      }
+    });
+  }
+    
+  // If window.bodlEvents.cart.addItem is available, then...
+  if (typeof window.bodlEvents.cart.addItem === 'function') {
+    window.bodlEvents.cart.addItem((payload) => {
+      try {
+        if (typeof _cl !== 'undefined') {
+          var cust_prop = composeCustomProperties('added_to_cart', payload);
+          var products = bigcommerce_products_mapping(payload, 'line_items');
+          _cl.trackClick('Added to cart', { customProperties: cust_prop, productProperties: products });
+        }
+      } catch (e) {
+        console.warn('CL addItem error', e);
+      }
+    });
+  }
+    
+  // If window.bodlEvents.cart.viewed is available, then...
+  if (typeof window.bodlEvents.cart.viewed === 'function') {
+    window.bodlEvents.cart.viewed((payload) => {
+      try {
+        if (typeof _cl !== 'undefined') {
+          var cust_prop = composeCustomProperties('cart_viewed', payload);
+          var products = bigcommerce_products_mapping(payload, 'line_items');
+          _cl.trackClick('Cart viewed', { customProperties: cust_prop, productProperties: products });
+        }
+      } catch (e) {
+        console.warn('CL cart.viewed error', e);
+      }
+    });
+  }
+    
+  // If window.bodlEvents.cart.removeItem is available, then...
+  if (typeof window.bodlEvents.cart.removeItem === 'function') {
+    window.bodlEvents.cart.removeItem((payload) => {
+      try {
+        if (typeof _cl !== 'undefined') {
+            var cust_prop = composeCustomProperties('removed_from_cart', payload);
+            var products = bigcommerce_products_mapping(payload, 'line_items');
+          _cl.trackClick('Removed from cart', { customProperties: cust_prop, productProperties: products });
+        }
+      } catch (e) {
+        console.warn('CL removeItem error', e);
+      }
+    });
+  }
+
+  // If window.bodlEvents.checkout.shippingDetailsProvided is available, then...
+  if (typeof window.bodlEvents.checkout.shippingDetailsProvided === 'function') {
+    window.bodlEvents.checkout.shippingDetailsProvided((payload) => {
+      var cust_prop = composeCustomProperties('checkout_shipping_info_submitted', payload);
+      var products = bigcommerce_products_mapping(payload, 'line_items');
+      _cl.trackClick('AddShippingInfo', { customProperties: cust_prop, productProperties: products });
+    });
+  }
+ 
+  // If window.bodlEvents.checkout.paymentDetailsProvided is available, then...
+  if (typeof window.bodlEvents.checkout.paymentDetailsProvided === 'function') {
+    window.bodlEvents.checkout.paymentDetailsProvided((payload) => {
+      var cust_prop = composeCustomProperties('payment_info_submitted', payload);
+      var products = bigcommerce_products_mapping(payload, 'line_items');
+      _cl.trackClick('AddPaymentInfo', { customProperties: cust_prop, productProperties: products });
+    });
+  }
+ 
+  // If window.bodlEvents.checkout.orderPurchased is available, then...
+  if (typeof window.bodlEvents.checkout.checkoutBegin === 'function') {
+          window.bodlEvents.checkout.checkoutBegin(async (payload) => {
+              const checkoutId = '{{checkout.id}}';
+              let products = [];
+              let userInfo = {};
+  
+              try {
+                  const data = await getData(`/api/storefront/checkouts/${checkoutId}`);
+                  var email = data.billingAddress?.email;
+                  var customer_id = window.bodl.shopper.customer_id;
+                  let proPerties = {
+                    "customProperties":{
+                       "user_traits":{
+                      "bc_customer_id": {
+                        "t": "string",
+                        "v": customer_id,
+                      },
+                      "email":{
+                        "t": "string",
+                        "v": email,
+                      },
+                    },
+                    "identify_by_email":{
+                      "t":"string",
+                      "v": email,
+                      "ib": true
+                    }
+                  }
+                  } 
+                  if (typeof _cl !== 'undefined') {
+                      var cust_prop = composeCustomProperties('checkout_started', payload);
+                      var mappedProducts = bigcommerce_products_mapping(payload, 'line_items');
+                      _cl.trackClick('Checkout made', { customProperties: cust_prop, productProperties: mappedProducts });
+                  }
+                  if(email || customer_id){
+                    triggerIdentify(proPerties);
+                  }
+              } catch (e) {
+                  console.log('CL checkoutBegin error', e);
+              }
+          });
+      }
+  
+      // ✅ orderPurchased (fixed async/await issue)
+      if (typeof window.bodlEvents.checkout.orderPurchased === 'function') {
+          window.bodlEvents.checkout.orderPurchased(async (payload) => {
+              let products = [];
+  
+              try {
+                  const data = await getData(`/api/storefront/order/${payload.order_id}`);
+                   let customer_id = window.bodl.shopper.customer_id;
+                   let billingInfo = data.billingAddress;
+                    let customProperties = {
+                      "user_traits":{
+                        "bc_customer_id": {
+                          "t": "string",
+                          "v": customer_id
+                        },
+                        "email":{
+                          "t": "string",
+                          "v": billingInfo.email
+                        },
+                        "first_name":{
+                          "t": "string",
+                          "v": billingInfo.firstName
+                        },
+                        "last_name":{
+                          "t": "string",
+                          "v": billingInfo.lastName
+                        },
+                        "company":{
+                          "t": "string",
+                          "v": billingInfo.company
+                        },
+                        "address1":{
+                          "t": "string",
+                          "v": billingInfo.address1
+                        },
+                        "address2":{
+                          "t": "string",
+                          "v": billingInfo.address2
+                        },
+                        "city":{
+                          "t": "string",
+                          "v": billingInfo.city
+                        },
+                        "phone":{
+                          "t": "string",
+                          "v": billingInfo.phone
+                        }
+                      }
+                    }
+                  if (billingInfo.email && billingInfo.email !== null && billingInfo.email !== "") {
+                        customProperties["identify_by_email"] = {
+                            "t": "string",
+                            "v": billingInfo.email,
+                            "ib": true
+                        };
+                        if (billingInfo.phone && billingInfo.phone !== null && billingInfo.phone !== "") {
+                            customProperties["external_ids"] = {
+                                "t": "Object",
+                                "v": {
+                                    "identify_by_phone": {
+                                        "t": "string",
+                                        "v": billingInfo.phone
+                                    }
+                                }
+                            };
+                        }
+                    } else if (billingInfo.phone && billingInfo.phone !== null && billingInfo.phone !== "") {
+                        customProperties["identify_by_phone"] = {
+                            "t": "string",
+                            "v": billingInfo.phone,
+                            "ib": true
+                        };
+                    }
+
+
+  
+                  if (typeof _cl !== 'undefined') {
+                      var cust_prop = composeCustomProperties('checkout_completed', payload);
+                      var mappedProducts = bigcommerce_products_mapping(payload, 'line_items');
+                      _cl.trackClick('Purchased', { customProperties: cust_prop, productProperties: mappedProducts });
+                  }
+                  if(billingInfo.email || billingInfo.phone || customer_id){
+                    triggerIdentify({"customProperties": customProperties});
+                  }
+              } catch (e) {
+                  console.warn('CL orderPurchased error', e);
+              }
+          });
+      }
+}
+ 
+// when the page window loads, run the subscribeOnBodlEvents function
+window.addEventListener('load', subscribeOnBodlEvents, false);
+ 
+</script>
