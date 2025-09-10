@@ -135,12 +135,14 @@ function subscribeOnBodlEvents() {
   if (typeof window.bodlEvents.consent.loaded === 'function') {
     // run the loaded function to get the payload
     window.bodlEvents.consent.loaded((payload) => {
-      // log the event payload
-      console.log(
-        'window.bodlEvents.consent.loaded ~ payload',
-        payload
-      );
-      // no CL event for consent in default helper; keep as log-only
+       const userConsent = {
+        ad_storage: payload.advertising,
+        analytics_storage: payload.analytics,
+        functional_storage: payload.functional,
+        ad_personalization: payload.advertising,
+        ad_user_data: payload.advertising,
+       }
+       _cl.trackConsent(userConsent);
     });
   }
  
@@ -148,12 +150,14 @@ function subscribeOnBodlEvents() {
   if (typeof window.bodlEvents.consent.updated === 'function') {
     // run the updated function to get the payload
     window.bodlEvents.consent.updated((payload) => {
-      // log the event payload
-      console.log(
-        'window.bodlEvents.consent.updated ~ payload',
-        payload
-      );
-      // no CL event for consent in default helper; keep as log-only
+      const userConsent = {
+        ad_storage: payload.advertising,
+        analytics_storage: payload.analytics,
+        functional_storage: payload.functional,
+        ad_personalization: payload.advertising,
+        ad_user_data: payload.advertising,
+       }
+       _cl.trackConsent(userConsent);
     });
   } 
  
