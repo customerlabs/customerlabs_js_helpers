@@ -57,7 +57,7 @@ var composeCustomProperties = function(eventName, eventData) {
                 break;
             case "cart_viewed":
                 customData.currency = eventData.currency || "INR";
-                customData.value = eventData.cart_value;
+                customData.value = eventData.cart_value || 1;
                 break;
             case "checkout_started":
             case "checkout_address_info_submitted":
