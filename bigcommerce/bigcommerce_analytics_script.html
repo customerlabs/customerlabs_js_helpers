@@ -41,7 +41,7 @@ var composeCustomProperties = function(eventName, eventData) {
         switch (eventName) {
             case "product_viewed":
                 customData.currency = eventData.currency|| "INR";
-                customData.value = eventData.product_value|| 0;
+                customData.value = eventData.product_value|| 1;
                 break;
             case "collection_viewed":
                 customData.category_name = eventData.category_name || "";
@@ -50,7 +50,7 @@ var composeCustomProperties = function(eventName, eventData) {
             case "product_added_to_cart":
             case "product_removed_from_cart":
                 customData.currency = eventData.currency || "INR";
-                customData.value = eventData.product_value || 0;
+                customData.value = eventData.product_value || 1;
                 break;
             case "search_submitted":
                 customData.search_string = eventData.search_keyword || "";
@@ -65,7 +65,7 @@ var composeCustomProperties = function(eventName, eventData) {
             case "checkout_shipping_info_submitted":
             case "payment_info_submitted":
                 customData.currency = eventData.currency || "INR";
-                customData.value = eventData.cart_value || 0;
+                customData.value = eventData.cart_value || 1;
                 break;
             case "checkout_completed":
                 var transaction_number = eventData.order_id;
@@ -73,7 +73,7 @@ var composeCustomProperties = function(eventName, eventData) {
                 customData.currency = eventData.currency || "INR";
                 customData.subtotal = eventData.subtotal || 0;
                 customData.tax = eventData.tax || 0;
-                customData.value = eventData.cart_value || 0;
+                customData.value = eventData.cart_value || 1;
                 customData.shipping = eventData.shipping_price || 0;
                 customData.customer_id = eventData.customer_id || "";
                 break;
